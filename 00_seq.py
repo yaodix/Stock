@@ -1,4 +1,6 @@
-# %matplotlib inline
+# 简单序列数据预测示例
+#
+#
 import torch
 from torch import nn
 from d2l import torch as d2l
