@@ -19,9 +19,11 @@ import matplotlib.pyplot as plt
 # 下载个股日k数据图
 df_daily = ak.stock_zh_a_hist(symbol="000338", period = "daily", start_date= "20230131", end_date="20230531")
 t_df_daily = ak.stock_zh_a_hist(symbol="600640", period = "daily", start_date= "20230302", end_date="20230704")
+print(df_daily.tail())
 
 
 X = df_daily["收盘"]
+print(X.tail())
 x_t = t_df_daily["收盘"]
 pivots = peak_valley_pivots(X, 0.03, -0.03)
 t_pivots = peak_valley_pivots(x_t, 0.03, -0.03)
