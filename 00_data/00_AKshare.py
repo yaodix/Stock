@@ -4,6 +4,7 @@
 import akshare as ak
 import numpy as np
 import pandas as pd
+import datetime as dt
 
 import matplotlib.pyplot as plt
 
@@ -30,19 +31,35 @@ def test_one():
   X = df_daily["收盘"]
   print(X.tail())
 
-# 获取所有深A,沪A股市代码,过滤ST，新股、次新股
 def get_sh_sz_A_name():
+# 获取所有深A,沪A股市代码,过滤ST，新股、次新股
   list = []
 
   #获取全部股票代码
   stock_info_a_code_name_df = ak.stock_info_a_code_name()
   total_codes = stock_info_a_code_name_df['code'].tolist()
 
+
+          
   #非科创板、非创业板、非北京
   for code in total_codes:
       if code[:2] == '60' or code[:1] == '0':
           list.append(code)
 
+  # 非退市
+  stock_stop_sh = ak.stock_zh_a_stop_em()
+  sh_del = ak.stock_info_sh_delist()
+  sz_del = ak.stock_info_sz_delist()
+  
+  # print(sh_del.head())
+  # print(sz_del.head())
+  # print(stock_stop_sh.head())
+  stop_list = sh_del['公司代码'].tolist() + stock_stop_sh['代码'].tolist()
+  # print('000038' in stop_list)
+  for code in stop_list:
+      if code in list and code in stop_list:
+          list.remove(code)
+          
   #非ST
   stock_zh_a_st_em_df = ak.stock_zh_a_st_em()
   ST_list = stock_zh_a_st_em_df['代码'].tolist()
@@ -98,8 +115,53 @@ def get_security_info(symbol = str):
     # 
     return
 
+    
+def is_break_low(symbol = str, ratio = 0.6, all_days = 250*5, long_time_days = 250, short_time_days= 150):
+  '''
+  
+  '''
+  stocks = get_sh_sz_A_name()
+  
+  for code in stocks.code.tolist():
+    end_day = dt.date(dt.date.today().year,dt.date.today().month,dt.date.today().day)
+    days = long_time_days * 7 / 5
+    #考虑到周六日非交易
+    start_day = end_day - dt.timedelta(days)
+
+    start_day = start_day.strftime("%Y%m%d")
+    end_day = end_day.strftime("%Y%m%d")   
+    
+    df_daily = ak.stock_zh_a_hist(symbol=code, period = "daily", start_date=start_day, end_date= end_day, adjust= 'qfq')
+    
+    # max loc
+    # print(f'df_daily {df_daily.head()}')
+    close = df_daily.收盘
+    # print(f'close {close.head()}')
+    
+    max_price_index = close.idxmax()
+    max_price = close.max()
+    
+    min_price_index_after_max = close[max_price_index:].idxmin()
+    min_price_after_max = close[max_price_index:].min()
+    
+    # 低价最近发生
+    if min_price_after_max < 2:  # 即将退市股票
+      continue
+    
+    if min_price_index_after_max > close.size-10 and  min_price_index_after_max > max_price_index and min_price_after_max / max_price < ratio:
+      print(code)
+      print(f"max price {max_price}, data {df_daily.loc[max_price_index]['日期']}")
+      print(f"min price {min_price_after_max}, data {df_daily.loc[min_price_index_after_max]['日期']}")
+      # break
+    
+    # min loc after max loc
+    
+    
+    
+  return
 
 if __name__ == "__main__":
-    n = get_sh_sz_A_name()
-    print(n.head)
+    # n = get_sh_sz_A_name()
+    # print(n.head)
+    res = is_break_low()
 

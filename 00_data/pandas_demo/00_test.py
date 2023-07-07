@@ -17,7 +17,7 @@ df = pd.DataFrame({'one': pd.Series(np.random.randn(3), index=['a', 'b', 'c']),
 # print(df.apply(np.exp))
 tsdf = pd.DataFrame(np.random.randn(10, 3), columns=['A', 'B', 'C'],
                  index=pd.date_range('1/1/2023', periods=10))
-print(tsdf)
+# print(tsdf)
 
 row1 = tsdf.loc['1/1/2023']  # 返回Series类型
 row2 = tsdf.loc[['1/1/2023']]  # 返回DataFrame类型
@@ -45,7 +45,19 @@ def test1():
   print(f"df values\n{df.values}")
   
   
+  
+def test_slice():
+  # 按行切片
+  tsdf = pd.DataFrame(np.random.randn(10, 1), columns=['A'],
+                 index=pd.date_range('1/1/2023', periods=10))
+
+  print(tsdf)
+  print(tsdf.A.idxmax())
+  print(tsdf.A.idxmin())
+  print(tsdf[tsdf.A.idxmax():].A.idxmin())
+  
+  
 if __name__ == "__main__":
-  # test1()
-  print('1')
+  test_slice()
+  # print('1')
   
