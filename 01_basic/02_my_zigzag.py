@@ -22,7 +22,7 @@ t_df_daily = ak.stock_zh_a_hist(symbol="600640", period = "daily", start_date= "
 print(df_daily.tail())
 
 data_val = df_daily[["日期", "收盘"]]
-X = df_daily["收盘"]
+X = t_df_daily["收盘"]
 print(X.tail())
 
 data = np.asarray(X)
@@ -116,11 +116,15 @@ def my_zigzag(data, valid_thersh = 0.1):
   
   return pivots
   
+# 在某个涨跌趋势中，获取水平震荡期数据
+# def get_hor_data(data, thresh_limit = 0.06):
+  
 # ma5 = moving_average(X, 5);
 
 # reversed_arr = data[::-1]
 # reverse to find pivots
 pivots = my_zigzag(data)
+
           
 
 plot_pivots(X, pivots)
