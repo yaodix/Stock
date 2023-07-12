@@ -34,7 +34,7 @@ def plot_pivots(X, pivots):
     # plt.plot(np.arange(len(X))[pivots != 0], X[pivots != 0], 'k-')
 
 
-plot_pivots(data, {})
+# plot_pivots(data, {})
 # plt.show()
 
 training_data_len = int(np.ceil( len(data) * 0.9 ))
@@ -99,17 +99,45 @@ x_test = np.array(x_test)
 x_test = np.reshape(x_test, (x_test.shape[0], x_test.shape[1], 1 ))
 
 # Get the models predicted price values 
-predictions = model.predict(x_test)
-predictions = scaler.inverse_transform(predictions)
+predictions_b = model.predict(x_test)
+predictions = scaler.inverse_transform(predictions_b)
+
+#################################
+x_test_t = scaled_data.copy()
+x_test_t[training_data_len:] = 0
+
+for i in range(training_data_len, len(data) - 60):
+    x_test_t_60 = x_test_t[i-60 : i]
+    x_test_t_60 = np.squeeze(x_test_t_60)
+    x_test_t_60 = np.reshape(x_test_t_60, (1, x_test_t_60.shape[0], 1 ))
+    predictions_t = model.predict(x_test_t_60)
+    # predictions_t = scaler.inverse_transform(predictions_t)
+    x_test_t[i] = predictions_t[0][0]
+
+##################################
 
 # Get the root mean squared error (RMSE)
 rmse = np.sqrt(np.mean(((predictions - y_test) ** 2)))
 print(f"rmse {rmse}")
 
+print('-----------------')
+print(predictions_b)
+print(x_test_t[training_data_len:])
+print('-----------------')
+
+
 # Plot the data
 train = price_df[:training_data_len]
 valid = price_df[training_data_len:]
-valid['预测'] = predictions
+valid['预测1'] = predictions
+
+predictions_2 = scaler.inverse_transform( x_test_t[training_data_len:-60])
+valid['预测2'] = pd.Series(predictions_2)
+
+
+print(predictions)
+print(predictions_2)
+print('-----------------')
 # Visualize the data
 plt.figure(figsize=(16,6))
 plt.title('Model')
@@ -117,6 +145,6 @@ plt.xlabel('Date', fontsize=18)
 plt.ylabel('Close Price USD ($)', fontsize=18)
 
 plt.plot(np.array(train['收盘']))
-plt.plot(valid[['收盘', '预测']])
+plt.plot(valid[['收盘', '预测1', '预测2']])
 plt.legend(['Train', 'Val', 'Predictions'], loc='lower right')
 plt.show()
