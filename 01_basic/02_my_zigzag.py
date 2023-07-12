@@ -4,7 +4,6 @@
 import akshare as ak
 import numpy as np
 import pandas as pd
-from findiff import FinDiff
 
 import matplotlib.pyplot as plt
 
