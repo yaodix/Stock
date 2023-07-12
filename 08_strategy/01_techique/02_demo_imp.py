@@ -64,6 +64,7 @@ x_train, y_train = np.array(x_train), np.array(y_train)
 x_train = np.reshape(x_train, (x_train.shape[0], x_train.shape[1], 1))
 # x_train.shape
 
+
 from keras.models import Sequential
 from keras.layers import Dense, LSTM
 
@@ -84,23 +85,20 @@ model.fit(x_train, y_train, batch_size=1, epochs=1)
 
 
 # Create the testing data set
-# Create a new array containing scaled values from index 1543 to 2002 
-test_data = scaled_data[training_data_len - 60: , :]
-# Create the data sets x_test and y_test
-
-
 '''simple way but no elegant'''
 
 x_test = scaled_data.copy()
 x_test[training_data_len:] = 0
 
 for i in range(training_data_len, len(data) - 60):
-    x_test = (x_test[i-60 : i])
-    x_test = np.reshape(x_test, (x_test.shape[0], x_test.shape[1], 1 ))
-    predictions = model.predict(x_test)
-    predictions = scaler.inverse_transform(predictions)
-    x_test[i, ] = predictions[-1]
+    x_test_60 = x_test[i-60 : i]
+    x_test_60 = np.squeeze(x_test_60)
+    x_test_60 = np.reshape(x_test_60, (1, x_test_60.shape[0], 1 ))
+    predictions = model.predict(x_test_60)
+    # predictions = scaler.inverse_transform(predictions)
+    x_test[i] = predictions[0][0]
     
+predictions = scaler.inverse_transform( x_test[training_data_len:])
 # Get the root mean squared error (RMSE)
 # rmse = np.sqrt(np.mean(((predictions - y_test) ** 2)))
 # print(f"rmse {rmse}")
