@@ -80,7 +80,7 @@ model.add(Dense(1))
 model.compile(optimizer='adam', loss='mean_squared_error')
 
 # Train the model
-model.fit(x_train, y_train, batch_size=1, epochs=1)
+model.fit(x_train, y_train, batch_size=48, epochs=5)
 
 
 # Create the testing data set
@@ -121,8 +121,8 @@ rmse = np.sqrt(np.mean(((predictions - y_test) ** 2)))
 print(f"rmse {rmse}")
 
 print('-----------------')
-print(predictions_b)
-print(x_test_t[training_data_len:])
+# print(predictions_b)
+# print(x_test_t[training_data_len:])
 print('-----------------')
 
 
@@ -132,19 +132,23 @@ valid = price_df[training_data_len:]
 valid['预测1'] = predictions
 
 predictions_2 = scaler.inverse_transform( x_test_t[training_data_len:-60])
-valid['预测2'] = pd.Series(predictions_2)
+
+predictions_2 = predictions_2.squeeze()
+tmp_60 = np.ones(60)
+predictions_2 = np.concatenate((predictions_2, tmp_60))
+valid['预测2'] = predictions_2
 
 
-print(predictions)
+print(predictions.squeeze())
 print(predictions_2)
 print('-----------------')
 # Visualize the data
 plt.figure(figsize=(16,6))
 plt.title('Model')
 plt.xlabel('Date', fontsize=18)
-plt.ylabel('Close Price USD ($)', fontsize=18)
+plt.ylabel('Close P)', fontsize=18)
 
 plt.plot(np.array(train['收盘']))
-plt.plot(valid[['收盘', '预测1', '预测2']])
-plt.legend(['Train', 'Val', 'Predictions'], loc='lower right')
+plt.plot(valid[['收盘', '预测1', '预测2']], 'o-')
+plt.legend(['Train', 'Val', '预测1', '预测2'], loc='top right')
 plt.show()
