@@ -1,3 +1,8 @@
+'''
+matplt绘图示例
+
+'''
+
 import matplotlib.pyplot as plt
 import numpy as np
 

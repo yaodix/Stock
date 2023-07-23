@@ -1,10 +1,14 @@
+'''
 # 20230704
 # python 3.8+
+AKshare股票下载示例
+'''
 
 import akshare as ak
 import numpy as np
 import pandas as pd
 import datetime as dt
+from  tqdm import tqdm
 
 import matplotlib.pyplot as plt
 
@@ -31,8 +35,10 @@ def test_one():
   X = df_daily["收盘"]
   print(X.tail())
 
+
 def get_sh_sz_A_name():
 # 获取所有深A,沪A股市代码,过滤ST，新股、次新股
+# 
   list = []
 
   #获取全部股票代码
@@ -122,7 +128,7 @@ def is_break_low(symbol = str, ratio = 0.6, all_days = 250*5, long_time_days = 2
   '''
   stocks = get_sh_sz_A_name()
   
-  for code in stocks.code.tolist():
+  for code in tqdm(stocks.code.tolist()):
     end_day = dt.date(dt.date.today().year,dt.date.today().month,dt.date.today().day)
     days = long_time_days * 7 / 5
     #考虑到周六日非交易
@@ -156,12 +162,53 @@ def is_break_low(symbol = str, ratio = 0.6, all_days = 250*5, long_time_days = 2
     
     # min loc after max loc
     
-    
-    
   return
+
+
+def yaogu(decrease_years = 2.5, increse_day = 12):
+  stocks = get_sh_sz_A_name()
+  output_cnt = 0
+  print(f"stock size {len(stocks)}")
+
+  for code in tqdm(stocks.code.tolist()[0:]):
+    # print(f"calc stock id {code}")
+    end_day = dt.date(dt.date.today().year,dt.date.today().month,dt.date.today().day)
+    days = 250 * 7 / 5
+    #考虑到周六日非交易
+    start_day = end_day - dt.timedelta(decrease_years * days)
+
+    start_day = start_day.strftime("%Y%m%d")
+    end_day = end_day.strftime("%Y%m%d")   
+    
+    df_daily = ak.stock_zh_a_hist(symbol=code, period = "daily", start_date=start_day, end_date= end_day, adjust= 'qfq')
+    
+    # max loc
+    # print(f'df_daily {df_daily.head()}')
+    close = df_daily.收盘
+    # print(f'close {close.head()}')
+    # 最近10天涨幅20-35%
+    close_prices = close.to_numpy()
+
+    short_max_price = close_prices[-5:].max()
+    short_min_price = close_prices[-11:-5].min()
+    Inc_ratio = (short_max_price - short_min_price) / short_min_price
+
+    max_price = close_prices[0:125].max()
+    min_price = close_prices[-80:-10].min()
+    dec_ratio = (max_price - min_price) / max_price
+    min_price = close.min()
+
+    if min_price > 1.0 and 0.20 < Inc_ratio and Inc_ratio < 0.35 and  0.4 < dec_ratio :
+      print(f"yaogu {code}")
+    else :
+      output_cnt += 1
+      # if (output_cnt %100 == 0):
+        # print(f"out code")
+
 
 if __name__ == "__main__":
     # n = get_sh_sz_A_name()
     # print(n.head)
-    res = is_break_low()
+    # res = is_break_low()
+    yaogu()
 
