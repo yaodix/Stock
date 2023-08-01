@@ -216,8 +216,8 @@ def diweiqidong(ratio = 0.7, all_days = 250*5, long_time_days = 250*3, short_tim
     # 两个
   
   # 最近价格都小于
-
-    if break_1_ratio > 8 and break_2_ratio > 8 and abs(inc_2_val - inc_1_val)/ inc_1_val < 0.2 and abs(inc_2_val - inc_1_val)/ inc_2_val < 0.2 and break_2_index - break_1_index > 20 and \
+    price_diff_thresh = 0.05
+    if break_1_ratio > 8 and break_2_ratio > 8 and abs(inc_2_val - inc_1_val)/ inc_1_val < price_diff_thresh and abs(inc_2_val - inc_1_val)/ inc_2_val < price_diff_thresh and break_2_index - break_1_index > 20 and \
        min_price_near_index > max_price_index and min_price_near / max_price < ratio and  min(inc_2_val, min_price_near) / max(inc_2_val ,min_price_near) > 0.65 and \
         cnt <=2  and cnt2 > 3:
       print(code)
@@ -233,6 +233,80 @@ def diweiqidong(ratio = 0.7, all_days = 250*5, long_time_days = 250*3, short_tim
     
   return
 
+def WaveCode(long_time_days = 250*3, days_after_max_price_thresh = 250, cur_bump_days_thresh = 40):
+  stocks = get_sh_sz_A_name()
+  
+  for code in tqdm(stocks.code.tolist()[675:]):
+    # code = "600103"
+    end_day = dt.date(dt.date.today().year,dt.date.today().month,dt.date.today().day)
+    
+    #考虑到周六日非交易
+    days = long_time_days * 7 / 5
+    start_day = end_day - dt.timedelta(days)
+
+    start_day = start_day.strftime("%Y%m%d")
+    end_day = end_day.strftime("%Y%m%d")   
+    # end_day = "20230529"
+    
+    df_daily = ak.stock_zh_a_hist(symbol=code, period = "daily", start_date=start_day, end_date= end_day, adjust= 'qfq')
+
+    pivots = {}
+    # print(f'close {df_daily.head()}')
+    close_daily = df_daily.最低
+    increase_daily = df_daily.涨跌幅
+    low_price_daily = df_daily.收盘
+    # 1.
+    idx_max = close_daily.idxmax()
+    max_close_price = close_daily.max()
+    # print(f"max_close_price {max_close_price}, day {df_daily.loc[idx_max]['日期']}")
+    pivots[idx_max] = max_close_price
+
+    # 2. 
+    idx_min = close_daily[idx_max:].idxmin()
+    min_close_price = close_daily[idx_max:].min()
+    # print(f"min_close_price {min_close_price}, day {df_daily.loc[idx_min]['日期']}")
+    pivots[idx_min] = min_close_price
+
+    days_after_max_price = idx_min - idx_max
+    # print(f"days_after_max_price {days_after_max_price}")
+
+    # 跌超过一办， 跌一段时间
+    if days_after_max_price < days_after_max_price_thresh and min_close_price / max_close_price > 0.5:
+      continue
+
+    # 
+    if min(idx_min+5, close_daily.size) == close_daily.size:
+      continue
+
+    idx_min_near = close_daily[min(idx_min+5, close_daily.size):].idxmin()
+    min_close_price_near = close_daily[min(idx_min+5, close_daily.size):].min()
+    # print(f"min_close_price_near {min_close_price_near}, day {df_daily.loc[idx_min_near]['日期']}")
+    pivots[idx_min_near] = min_close_price_near
+
+  # 条件： 反弹一段时间，最后反弹幅度小
+    if idx_min_near- idx_min < cur_bump_days_thresh or \
+      (min_close_price_near - min_close_price)/ min_close_price > 0.08:
+      continue
+
+    # 反弹区间有涨幅
+    idx_max_near = close_daily[idx_min:idx_min_near].idxmax()
+    max_close_price_near = close_daily[idx_min:idx_min_near].max()
+    # print(f"max_close_price_near {max_close_price_near}, day {df_daily.loc[idx_max_near]['日期']}")
+    pivots[idx_max_near] = max_close_price_near
+
+    if max_close_price_near / min_close_price < 0.4:
+      continue
+    
+    # 最后时间点发生在最近
+    if idx_min_near > close_daily.size-7:
+      print(f"--------code is {code}----------")
+      print(f"max_close_price {max_close_price}, day {df_daily.loc[idx_max]['日期']}")
+      print(f"min_close_price {min_close_price}, day {df_daily.loc[idx_min]['日期']}")
+      print(f"max_close_price_near {max_close_price_near}, day {df_daily.loc[idx_max_near]['日期']}")
+      print(f"min_close_price_near {min_close_price_near}, day {df_daily.loc[idx_min_near]['日期']}")
+
+
+
 
 
 if __name__ == "__main__":
@@ -240,5 +314,5 @@ if __name__ == "__main__":
     # print(n.head)
     # res = is_break_low()
     # yaogu()
-    diweiqidong()
+    WaveCode()
 
