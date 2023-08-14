@@ -164,11 +164,12 @@ def diweiqidong(ratio = 0.7, all_days = 250*5, long_time_days = 250*3, short_tim
 
   test: 青山纸业 600103   20230302-20230529
   test: 学大教育 000526   20230130-20230428
+  test: 塞力医疗 603716   20230130-20230804
   '''
   stocks = get_sh_sz_A_name()
   
   for code in tqdm(stocks.code.tolist()):
-    # code = "600103"
+    code = "603716"
     end_day = dt.date(dt.date.today().year,dt.date.today().month,dt.date.today().day)
     
     #考虑到周六日非交易
@@ -176,8 +177,8 @@ def diweiqidong(ratio = 0.7, all_days = 250*5, long_time_days = 250*3, short_tim
     start_day = end_day - dt.timedelta(days)
 
     start_day = start_day.strftime("%Y%m%d")
-    end_day = end_day.strftime("%Y%m%d")   
-    # end_day = "20230529"
+    # end_day = end_day.strftime("%Y%m%d")   
+    end_day = "20230804"
     
     df_daily = ak.stock_zh_a_hist(symbol=code, period = "daily", start_date=start_day, end_date= end_day, adjust= 'qfq')
     
@@ -314,5 +315,6 @@ if __name__ == "__main__":
     # print(n.head)
     # res = is_break_low()
     # yaogu()
-    WaveCode()
+    diweiqidong()
+    # WaveCode()
 
