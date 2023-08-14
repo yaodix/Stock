@@ -219,6 +219,9 @@ def diweiqidong(ratio = 0.7, all_days = 250*5, long_time_days = 250*3, short_tim
     last_cmp = close.iat[-1] < inc_2_val
     # 两个
   
+  # 去除多次涨停的股票
+
+
   # 最近价格都小于
     price_diff_thresh = 0.05
     break_ratio = break_1_ratio > 8 and break_2_ratio > 8
