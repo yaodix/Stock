@@ -162,14 +162,16 @@ def diweiqidong(ratio = 0.7, all_days = 250*5, long_time_days = 250*3, short_tim
     1. 2次涨停(或6%以上大阳线)，但股价没有大幅涨起来，青山纸业，间隔3个月60天交易日，有2次涨停
     2. 低位波动涨跌一次，到低位
 
-  test: 青山纸业 600103   20230302-20230529
-  test: 学大教育 000526   20230130-20230428
-  test: 塞力医疗 603716   20230130-20230804
+
+    test: 青山纸业 600103   20230302-20230605
+    test: 学大教育 000526   20230130-20230428
+    test: 塞力医疗 603716   20230130-20230804
   '''
   stocks = get_sh_sz_A_name()
-  
+  selected_stocs = {}
+
   for code in tqdm(stocks.code.tolist()):
-    code = "603716"
+    # code = "600103"
     end_day = dt.date(dt.date.today().year,dt.date.today().month,dt.date.today().day)
     
     #考虑到周六日非交易
@@ -177,8 +179,9 @@ def diweiqidong(ratio = 0.7, all_days = 250*5, long_time_days = 250*3, short_tim
     start_day = end_day - dt.timedelta(days)
 
     start_day = start_day.strftime("%Y%m%d")
-    # end_day = end_day.strftime("%Y%m%d")   
-    end_day = "20230804"
+    end_day = end_day.strftime("%Y%m%d")   
+    # start_day = "20230302"
+    # end_day = "20230605"
     
     df_daily = ak.stock_zh_a_hist(symbol=code, period = "daily", start_date=start_day, end_date= end_day, adjust= 'qfq')
     
@@ -212,25 +215,34 @@ def diweiqidong(ratio = 0.7, all_days = 250*5, long_time_days = 250*3, short_tim
   # 最近10天涨幅超过6，只有2个
     cnt = np.sum(increase[-10:]>=6)  
     # 涨停后回调
-    cnt2 = np.sum(close[-5:] < inc_2_val) 
-
+    cnt2 = np.sum(((close[-5:] - inc_2_val) / inc_2_val) < 0.05)
+    last_cmp = close.iat[-1] < inc_2_val
     # 两个
   
   # 最近价格都小于
     price_diff_thresh = 0.05
-    if break_1_ratio > 8 and break_2_ratio > 8 and abs(inc_2_val - inc_1_val)/ inc_1_val < price_diff_thresh and abs(inc_2_val - inc_1_val)/ inc_2_val < price_diff_thresh and break_2_index - break_1_index > 20 and \
-       min_price_near_index > max_price_index and min_price_near / max_price < ratio and  min(inc_2_val, min_price_near) / max(inc_2_val ,min_price_near) > 0.65 and \
-        cnt <=2  and cnt2 > 3:
+    break_ratio = break_1_ratio > 8 and break_2_ratio > 8
+    price_diff = abs(inc_2_val - inc_1_val)/ inc_1_val < price_diff_thresh and abs(inc_2_val - inc_1_val)/ inc_2_val < price_diff_thresh
+    days = break_2_index - break_1_index > 20
+    near_price_ratio =  min(inc_2_val, min_price_near) / max(inc_2_val ,min_price_near) > 0.65
+
+    if  break_ratio and price_diff and days and  min_price_near_index > max_price_index and\
+        min_price_near / max_price < ratio and near_price_ratio and cnt <=2  and cnt2 > 3 and last_cmp:
       print(code)
       print(f"break 1 {break_1_ratio}, data {df_daily.loc[break_1_index]['日期']}")
       print(f"break 2 {break_2_ratio}, data {df_daily.loc[break_2_index]['日期']}")
-
-
+      selected_stocs[code] = [df_daily.loc[break_1_index]['日期'], break_1_ratio, df_daily.loc[break_2_index]['日期'], break_2_ratio]
       # break
-    # 与之前10年股价差排序
 
-    # 低位横盘长度排序
-    # break
+  # 两次涨幅和排序
+  ratio_sum_sorted = sorted(selected_stocs.items(),  key = lambda x:(x[1][1]+x[1][3]), reverse = True)
+  for val in ratio_sum_sorted:
+    print(f"code {val[0]}, break 1 {val[1][0]}, data {val[1][1]}, break 1 {val[1][2]}, data {val[1][3]}")
+
+  # 与之前10年股价差排序
+
+  # 低位横盘长度排序
+  # break
     
   return
 
