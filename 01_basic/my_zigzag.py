@@ -15,16 +15,7 @@ import matplotlib.pyplot as plt
 # 20230131-20230531,　形态, 83周期
 # target: 600640，20230303 - 20030705
 
-# 下载个股日k数据图
-df_daily = ak.stock_zh_a_hist(symbol="000338", period = "daily", start_date= "20230131", end_date="20230531")
-t_df_daily = ak.stock_zh_a_hist(symbol="600640", period = "daily", start_date= "20230302", end_date="20230704")
-print(df_daily.tail())
 
-data_val = df_daily[["日期", "收盘"]]
-X = t_df_daily["收盘"]
-print(X.tail())
-
-data = np.asarray(X)
 
 # 添加数值、百分比
 def plot_pivots(X, pivots):
@@ -110,24 +101,37 @@ def my_zigzag(data, valid_thersh = 0.1):
           find_down = False
           find_up = True
           start_index = index
-          
+  if pivots.__len__() == 0:
+    return pivots
+  
   pivots[int(data.__len__()-1)] = -list(pivots.values())[-1]
   
   return pivots
   
-# 在某个涨跌趋势中，获取水平震荡期数据
-# def get_hor_data(data, thresh_limit = 0.06):
   
-# ma5 = moving_average(X, 5);
+if __name__ == "__main__":
+  # 下载个股日k数据图
+  df_daily = ak.stock_zh_a_hist(symbol="000338", period = "daily", start_date= "20230131", end_date="20230531")
+  t_df_daily = ak.stock_zh_a_hist(symbol="002507", period = "daily", start_date= "20230302", end_date="20231215")
+  # print(df_daily.tail())
 
-# reversed_arr = data[::-1]
-# reverse to find pivots
-pivots = my_zigzag(data)
+  data_val = df_daily[["日期", "收盘"]]
+  X = t_df_daily["收盘"]
+  # print(X.tail())
 
-          
+  data = np.asarray(X)
+  # 在某个涨跌趋势中，获取水平震荡期数据
+  # def get_hor_data(data, thresh_limit = 0.06):
+    
+  # ma5 = moving_average(X, 5);
 
-plot_pivots(X, pivots)
-plt.show()
+  # reversed_arr = data[::-1]
+  # reverse to find pivots
+  pivots = my_zigzag(data)
+  # print(data[pivots[0,]])          
+
+  plot_pivots(X, pivots)
+  plt.show()
 
 
 
