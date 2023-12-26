@@ -4,18 +4,9 @@
 import akshare as ak
 import numpy as np
 import pandas as pd
+import math
 
 import matplotlib.pyplot as plt
-
-
-# 下载A股所有数据
-# all_df = ak.stock_zh_a_spot_em()
-# print(all_df.head())
-
-# 20230131-20230531,　形态, 83周期
-# target: 600640，20230303 - 20030705
-
-
 
 # 添加数值、百分比
 def plot_pivots(X, pivots):
@@ -25,8 +16,6 @@ def plot_pivots(X, pivots):
     # plt.plot(np.arange(len(X)), pivots, 'r-', alpha=0.5)
     # plt.plot(np.arange(len(X))[pivots != 0], X[pivots != 0], 'k-')
     plt.scatter(pivots.keys(), X[pivots.keys()], color='g')
-      
-
 
 def moving_average(x, w):
     tmp = np.convolve(x, np.ones(w), 'same') / w
@@ -35,101 +24,125 @@ def moving_average(x, w):
     tmp[-half_w:] = x[-half_w:]
     return tmp
   
-
-def my_zigzag(data, valid_thersh = 0.1):
-  pivots = {}  # -1:low, 0: horizon, 1:high
-  adj_diff = np.diff(data)
-  base_price = data[0]
-  # 一维前缀和
-  cum_sum = np.cumsum(adj_diff)
-
-  # 先找到一个10%变化的阶段，判断起步方向
-  find_up = False
-  find_down = False
-  start_index = 0
-  for index, val in enumerate(cum_sum):
-    if (not find_down and not find_up):
-      if abs(val / base_price) > valid_thersh:
-        if val > cum_sum[0]: 
-          pivots[0] = -1
-          find_up = True
-          start_index = index
-        else:
-          pivots[0] = 1
-          find_down = True
-          start_index = index
-        
-    if (find_up and not find_down):  # 查找下降至少超过10%连续子数组
-      if index > start_index:
-        find_val = False
-        max_diff = 0
-        max_index = 0
-        for gap_index in range(start_index, index+1):
-          if cum_sum[index] < cum_sum[gap_index]:
-            diff = abs((cum_sum[index] - cum_sum[gap_index]) / data[index+1])
-            if diff > valid_thersh:  # down
-              # 遍历查找幅度最大的值
-              if (diff > max_diff):
-                max_diff = diff
-                max_index = gap_index
-                find_val = True          
-            
-        if find_val:
-          pivots[max_index+1] = 1
-          find_down = True
-          find_up = False
-          start_index = index
-          
-          
-    if (find_down and not find_up):  # 查找上升
-      if index > start_index:
-        find_val = False
-        max_diff = 0
-        max_index = 0
-        for gap_index in range(start_index, index+1):
-          if cum_sum[index] > cum_sum[gap_index]:
-            diff = abs((cum_sum[index] - cum_sum[gap_index]) / data[gap_index+1])
-            if diff > valid_thersh:  # down
-              # 遍历查找幅度最大的值
-              if (diff > max_diff):
-                max_diff = diff
-                max_index = gap_index
-                find_val = True          
-            
-        if find_val:
-          pivots[max_index+1] = 1
-          find_down = False
-          find_up = True
-          start_index = index
-  if pivots.__len__() == 0:
-    return pivots
+def get_wave(data, valid_thresh = 0.1):
+  '''
+    data is 收盘价  
+    valid_thresh: 比例
+  '''
+  pivots = {}  # -1:low,1:high
+  last_trend = 0 # -1: low, 1: high, 记录最后依次趋势的
+  first_trend_finded = False
+  to_find_up_trend = False
+  to_find_down_trend = False
+  range_data = np.asarray(data)
+  diff = np.diff(range_data)
+  diff = np.insert(diff, 0,0)
+  diff = diff / range_data
+  sum_res_n = np.zeros_like(diff) # 用于找最大负值
+  sum_res_p = np.zeros_like(diff) # 用于找最大正值
+  max_range = 0  
+  min_range = 0
   
-  pivots[int(data.__len__()-1)] = -list(pivots.values())[-1]
+  back_sum = 0
+  for idx, num in enumerate(diff):
+    if idx == 0: 
+      continue  # 跳过0
+    
+    if first_trend_finded is False:
+      sum_res_p[idx] = max(diff[idx], sum_res_p[idx-1]+diff[idx])
+      sum_res_n[idx] = min(diff[idx], sum_res_n[idx-1]+diff[idx])
+      max_range = max(max_range, sum_res_p[idx])
+      min_range = min(min_range, sum_res_n[idx])
+      
+      if max_range >= valid_thresh:
+        # 往回找到涨幅起点
+        for back_idx in range(idx, 0, -1):
+          back_sum = back_sum + diff[back_idx]
+          if (back_sum >= valid_thresh):
+            pivots[back_idx-1] = -1
+            first_trend_finded = True
+            to_find_down_trend = True
+            max_range = 0
+            last_trend = 1
+            break
+      if min_range <= -valid_thresh:
+        # 往回找到跌幅起点
+        back_sum = 0        
+        for back_idx in range(idx, 0, -1):
+          back_sum = back_sum + diff[back_idx]
+          if (back_sum <= -valid_thresh):
+            pivots[back_idx-1] = 1
+            first_trend_finded = True
+            to_find_up_trend = True
+            min_range =0
+            last_trend = -1
+            break
+    # 找下一个涨幅
+    if first_trend_finded and to_find_up_trend:
+      sum_res_p[idx] = max(diff[idx], sum_res_p[idx-1]+diff[idx])
+      max_range = max(max_range, sum_res_p[idx])
+      
+      if sum_res_p[idx] >= valid_thresh:
+        # 往回找到涨幅起点
+        back_sum = 0        
+        for back_idx in range(idx, 0, -1):
+          back_sum = back_sum+ diff[back_idx]
+          if (back_sum >= valid_thresh):
+            pivots[back_idx-1] = -1
+            to_find_up_trend = False
+            to_find_down_trend = True
+            max_range = 0
+            last_trend = 1
+            break
+    # 找下一个跌幅    
+    if first_trend_finded and to_find_down_trend:
+      sum_res_n[idx] = min(diff[idx], sum_res_n[idx-1]+diff[idx])
+      min_range = min(min_range, sum_res_n[idx])
+
+      if sum_res_n[idx] <= -valid_thresh:
+        # 往回找到跌幅起点
+        back_sum = 0        
+        for back_idx in range(idx, 0, -1):
+          back_sum += diff[back_idx]
+          if (back_sum <= valid_thresh):
+            pivots[back_idx-1] = 1
+            to_find_down_trend = False
+            to_find_up_trend = True
+            min_range = 0
+            last_trend = -1            
+            break     
+  # if last_trend == 1: # 最后一波是涨幅，
+  #   start_key = sorted(pivots.keys())[-1]
+  #   last_idx = np.argmax(data[start_key:-1])
+  #   pivots[start_key+last_idx] = 1
+  # else:
+  #   start_key = sorted(pivots.keys())[-1]
+  #   last_idx = np.argmin(data[start_key:-1])
+  #   pivots[start_key+last_idx] = -1
   
+  # 第一个点补齐
+  # check_start_key = sorted(pivots.keys())[1]
+  # if pivots[check_start_key] == 1: # 第一个点是高点，
+    
   return pivots
-  
+
+
+# 添加测试用例
+
   
 if __name__ == "__main__":
   # 下载个股日k数据图
   df_daily = ak.stock_zh_a_hist(symbol="000338", period = "daily", start_date= "20230131", end_date="20230531")
-  t_df_daily = ak.stock_zh_a_hist(symbol="002507", period = "daily", start_date= "20230302", end_date="20231215")
+  t_df_daily = ak.stock_zh_a_hist(symbol="002507", period = "daily", start_date= "20230102", end_date="20231215")
   # print(df_daily.tail())
-
-  data_val = df_daily[["日期", "收盘"]]
+  
+  # data_val = df_daily[["日期", "收盘"]]
   X = t_df_daily["收盘"]
-  # print(X.tail())
 
-  data = np.asarray(X)
-  # 在某个涨跌趋势中，获取水平震荡期数据
-  # def get_hor_data(data, thresh_limit = 0.06):
-    
+  data = np.asarray(X)    
   # ma5 = moving_average(X, 5);
-
-  # reversed_arr = data[::-1]
-  # reverse to find pivots
-  pivots = my_zigzag(data)
-  # print(data[pivots[0,]])          
-
+  pivots = get_wave(data)
+  print(pivots)
   plot_pivots(X, pivots)
   plt.show()
 
