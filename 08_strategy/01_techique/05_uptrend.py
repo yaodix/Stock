@@ -1,8 +1,10 @@
 
 # 01_basic/02_my_zigzag.py
 import sys
-sys.path.append(r"/home/yao/myproject/Stock/01_basic")
-sys.path.append(r"/home/yao/myproject/Stock/00_data")
+# sys.path.append(r"/home/yao/myproject/Stock/01_basic")
+# sys.path.append(r"/home/yao/myproject/Stock/00_data")
+sys.path.append(r"/home/yao/workspace/Stock/01_basic")
+sys.path.append(r"/home/yao/workspace/Stock/00_data")
 import akshare as ak
 import numpy as np
 import pandas as pd
@@ -32,7 +34,7 @@ for code in tqdm(stocks.code.tolist()):
   
   df_daily = ak.stock_zh_a_hist(symbol=code, period = "daily", start_date=start_day, end_date= end_day, adjust= 'qfq')
 
-  # df_daily = ak.stock_zh_a_hist(symbol="605599", period = "daily", start_date = start_day, end_date = end_day)
+  # df_daily = ak.stock_zh_a_hist(symbol="002955", period = "daily", start_date = start_day, end_date = end_day)
   X = df_daily["收盘"]
 
   data = np.asarray(X)
@@ -49,8 +51,11 @@ for code in tqdm(stocks.code.tolist()):
     wave_2_start = list(pivots.keys())[-3]
     wave_2_end = list(pivots.keys())[-2]
     wave_3_start = list(pivots.keys())[-1]
-  
-    if (data.__len__() - wave_3_start >= 1 and
+
+    if pivots[wave_3_start] != -1: # 最好一个必须为价格低点
+      continue
+
+    if (data.__len__() - wave_3_start >= 2 and
         data[wave_2_start] > data[wave_1_start] and data[wave_2_end] > data[wave_1_end] and data[wave_3_start] > data[wave_2_start] and
         5 <  wave_2_start - wave_1_start and  wave_2_start - wave_1_start < 30 and 
         5 <  wave_3_start - wave_2_start and  wave_3_start - wave_2_start < 30):  # 时间周期
@@ -70,6 +75,7 @@ for code in tqdm(stocks.code.tolist()):
         # ignore high price recent year
         
         uptrend_code.append(code)
+        print(f"append {code}")
         
 
 for c in uptrend_code:

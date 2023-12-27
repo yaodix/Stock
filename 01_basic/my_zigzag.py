@@ -136,7 +136,7 @@ test_data_2 = np.array([1, 0.8, 1.2, 1, 0.5, 1.5, 1.8, 1.0, 1.03])
   
 if __name__ == "__main__":
   # 下载个股日k数据图
-  df_daily = ak.stock_zh_a_hist(symbol="000888", period = "daily", start_date= "20230131", end_date="20231227")
+  df_daily = ak.stock_zh_a_hist(symbol="002952", period = "daily", start_date= "20230131", end_date="20231227")
   # t_df_daily = ak.stock_zh_a_hist(symbol="002507", period = "daily", start_date= "20230102", end_date="20231215")
   print(df_daily.tail())
   
