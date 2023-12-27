@@ -59,3 +59,14 @@ def get_sh_sz_A_name():
   df = stock_info_a_code_name_df[stock_info_a_code_name_df.code.isin(list)]
   
   return df   
+
+
+def moving_average(x, w):
+    '''
+    w = 5, 5日均线
+    '''
+    tmp = np.convolve(x, np.ones(w), 'same') / w
+    half_w = int(w/2)
+    tmp[:half_w] = x[:half_w]
+    tmp[-half_w:] = x[-half_w:]
+    return tmp

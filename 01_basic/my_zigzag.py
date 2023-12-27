@@ -25,13 +25,6 @@ def plot_pivots(X, pivots):
       
     plt.scatter(high_idx, X[high_idx], color='r')
     plt.scatter(low_idx, X[low_idx], color='g')
-
-def moving_average(x, w):
-    tmp = np.convolve(x, np.ones(w), 'same') / w
-    half_w = int(w/2)
-    tmp[:half_w] = x[:half_w]
-    tmp[-half_w:] = x[-half_w:]
-    return tmp
   
 def get_wave(data, valid_thresh = 0.1):
   '''
@@ -152,7 +145,6 @@ if __name__ == "__main__":
 
   data = np.asarray(X)    
   # data = test_data_1
-  # ma5 = moving_average(X, 5);
   pivots = get_wave(data, 0.1)
   print(pivots)
   plot_pivots(data, pivots)
