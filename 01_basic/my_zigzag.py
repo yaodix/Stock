@@ -56,13 +56,13 @@ def get_wave(data, valid_thresh = 0.1):
   for idx, num in enumerate(diff):
     if idx == 0: 
       continue  # 跳过0
-    print(idx)
+    # print(idx)
     if first_trend_finded is False:
       sum_res_p[idx] = max(diff[idx], sum_res_p[idx-1]+diff[idx])
       sum_res_n[idx] = min(diff[idx], sum_res_n[idx-1]+diff[idx])
       max_range = max(max_range, sum_res_p[idx])
       min_range = min(min_range, sum_res_n[idx])
-      print(idx)
+      # print(idx)
       if max_range >= valid_thresh:
         # 往回找到涨幅起点
         for back_idx in range(idx, -1, -1):
@@ -138,22 +138,22 @@ def get_wave(data, valid_thresh = 0.1):
 
 
 # 添加测试用例
-test_data_1 = np.array([1, 1.2, 1, 0.8, 1.5, 1.8, 1.0])
-test_data_2 = np.array([1, 0.8, 1.2, 1, 0.5, 1.5, 1.8, 1.0])
+test_data_1 = np.array([1, 1.2, 1, 0.8, 1.5, 1.8, 1.74])
+test_data_2 = np.array([1, 0.8, 1.2, 1, 0.5, 1.5, 1.8, 1.0, 1.03])
   
 if __name__ == "__main__":
   # 下载个股日k数据图
-  df_daily = ak.stock_zh_a_hist(symbol="000338", period = "daily", start_date= "20230131", end_date="20231031")
-  t_df_daily = ak.stock_zh_a_hist(symbol="002507", period = "daily", start_date= "20230102", end_date="20231215")
-  # print(df_daily.tail())
+  df_daily = ak.stock_zh_a_hist(symbol="000888", period = "daily", start_date= "20230131", end_date="20231227")
+  # t_df_daily = ak.stock_zh_a_hist(symbol="002507", period = "daily", start_date= "20230102", end_date="20231215")
+  print(df_daily.tail())
   
   # data_val = df_daily[["日期", "收盘"]]
   X = df_daily["收盘"]
 
   data = np.asarray(X)    
-  # data = test_data_2
+  # data = test_data_1
   # ma5 = moving_average(X, 5);
-  pivots = get_wave(data, 0.09)
+  pivots = get_wave(data, 0.1)
   print(pivots)
   plot_pivots(data, pivots)
   plt.show()
