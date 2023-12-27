@@ -13,9 +13,18 @@ def plot_pivots(X, pivots):
     plt.xlim(0, len(X))
     plt.ylim(X.min()*0.99, X.max()*1.01)
     plt.plot(np.arange(len(X)), X, 'k:', alpha=0.5)
-    # plt.plot(np.arange(len(X)), pivots, 'r-', alpha=0.5)
-    # plt.plot(np.arange(len(X))[pivots != 0], X[pivots != 0], 'k-')
-    plt.scatter(pivots.keys(), X[pivots.keys()], color='g')
+    high_idx =[]
+    low_idx =[]
+    for key in  pivots.keys():
+      if pivots[key] == 1:
+        high_idx.append(key)
+      else:
+        low_idx.append(key)
+    sorted(low_idx)
+    sorted(high_idx)
+      
+    plt.scatter(high_idx, X[high_idx], color='r')
+    plt.scatter(low_idx, X[low_idx], color='g')
 
 def moving_average(x, w):
     tmp = np.convolve(x, np.ones(w), 'same') / w
@@ -47,34 +56,36 @@ def get_wave(data, valid_thresh = 0.1):
   for idx, num in enumerate(diff):
     if idx == 0: 
       continue  # 跳过0
-    
+    print(idx)
     if first_trend_finded is False:
       sum_res_p[idx] = max(diff[idx], sum_res_p[idx-1]+diff[idx])
       sum_res_n[idx] = min(diff[idx], sum_res_n[idx-1]+diff[idx])
       max_range = max(max_range, sum_res_p[idx])
       min_range = min(min_range, sum_res_n[idx])
-      
+      print(idx)
       if max_range >= valid_thresh:
         # 往回找到涨幅起点
-        for back_idx in range(idx, 0, -1):
+        for back_idx in range(idx, -1, -1):
           back_sum = back_sum + diff[back_idx]
-          if (back_sum >= valid_thresh):
+          if abs(back_sum - max_range) < 1e-6:
             pivots[back_idx-1] = -1
             first_trend_finded = True
             to_find_down_trend = True
             max_range = 0
+            min_range = 0
             last_trend = 1
             break
       if min_range <= -valid_thresh:
         # 往回找到跌幅起点
         back_sum = 0        
-        for back_idx in range(idx, 0, -1):
+        for back_idx in range(idx, -1, -1):
           back_sum = back_sum + diff[back_idx]
-          if (back_sum <= -valid_thresh):
+          if abs(back_sum - min_range) < 1e-6:
             pivots[back_idx-1] = 1
             first_trend_finded = True
             to_find_up_trend = True
             min_range =0
+            max_range =0
             last_trend = -1
             break
     # 找下一个涨幅
@@ -82,15 +93,16 @@ def get_wave(data, valid_thresh = 0.1):
       sum_res_p[idx] = max(diff[idx], sum_res_p[idx-1]+diff[idx])
       max_range = max(max_range, sum_res_p[idx])
       
-      if sum_res_p[idx] >= valid_thresh:
+      if max_range >= valid_thresh:
         # 往回找到涨幅起点
         back_sum = 0        
-        for back_idx in range(idx, 0, -1):
+        for back_idx in range(idx, -1, -1):
           back_sum = back_sum+ diff[back_idx]
-          if (back_sum >= valid_thresh):
+          if abs(back_sum - max_range) < 1e-6:
             pivots[back_idx-1] = -1
             to_find_up_trend = False
             to_find_down_trend = True
+            min_range = 0
             max_range = 0
             last_trend = 1
             break
@@ -99,51 +111,51 @@ def get_wave(data, valid_thresh = 0.1):
       sum_res_n[idx] = min(diff[idx], sum_res_n[idx-1]+diff[idx])
       min_range = min(min_range, sum_res_n[idx])
 
-      if sum_res_n[idx] <= -valid_thresh:
+      if min_range <= -valid_thresh:
         # 往回找到跌幅起点
         back_sum = 0        
-        for back_idx in range(idx, 0, -1):
+        for back_idx in range(idx, -1, -1):
           back_sum += diff[back_idx]
-          if (back_sum <= valid_thresh):
+          if abs(back_sum - min_range) < 1e-6:
             pivots[back_idx-1] = 1
             to_find_down_trend = False
             to_find_up_trend = True
             min_range = 0
+            max_range = 0
             last_trend = -1            
             break     
-  # if last_trend == 1: # 最后一波是涨幅，
-  #   start_key = sorted(pivots.keys())[-1]
-  #   last_idx = np.argmax(data[start_key:-1])
-  #   pivots[start_key+last_idx] = 1
-  # else:
-  #   start_key = sorted(pivots.keys())[-1]
-  #   last_idx = np.argmin(data[start_key:-1])
-  #   pivots[start_key+last_idx] = -1
+  if last_trend == 1: # 最后一波是涨幅，
+    start_key = sorted(pivots.keys())[-1]
+    last_idx = np.argmax(data[start_key:])
+    pivots[start_key+last_idx] = 1
+  else:
+    start_key = sorted(pivots.keys())[-1]
+    last_idx = np.argmin(data[start_key:])
+    pivots[start_key+last_idx] = -1
   
-  # 第一个点补齐
-  # check_start_key = sorted(pivots.keys())[1]
-  # if pivots[check_start_key] == 1: # 第一个点是高点，
     
   return pivots
 
 
 # 添加测试用例
-
+test_data_1 = np.array([1, 1.2, 1, 0.8, 1.5, 1.8, 1.0])
+test_data_2 = np.array([1, 0.8, 1.2, 1, 0.5, 1.5, 1.8, 1.0])
   
 if __name__ == "__main__":
   # 下载个股日k数据图
-  df_daily = ak.stock_zh_a_hist(symbol="000338", period = "daily", start_date= "20230131", end_date="20230531")
+  df_daily = ak.stock_zh_a_hist(symbol="000338", period = "daily", start_date= "20230131", end_date="20231031")
   t_df_daily = ak.stock_zh_a_hist(symbol="002507", period = "daily", start_date= "20230102", end_date="20231215")
   # print(df_daily.tail())
   
   # data_val = df_daily[["日期", "收盘"]]
-  X = t_df_daily["收盘"]
+  X = df_daily["收盘"]
 
   data = np.asarray(X)    
+  # data = test_data_2
   # ma5 = moving_average(X, 5);
-  pivots = get_wave(data)
+  pivots = get_wave(data, 0.09)
   print(pivots)
-  plot_pivots(X, pivots)
+  plot_pivots(data, pivots)
   plt.show()
 
 
