@@ -12,12 +12,12 @@ from  tqdm import tqdm
 import matplotlib.pyplot as plt
 
 
-from my_zigzag import my_zigzag, plot_pivots
+from my_zigzag import get_wave, plot_pivots
 from stock_data_utils import get_sh_sz_A_name
 
 
-## 低位，有10个点以上的反弹回调，再反弹次数幅度大于5%，有2个大于3个点的涨幅
 long_time_days = 250
+uptrend_code = []
 stocks = get_sh_sz_A_name()
 for code in tqdm(stocks.code.tolist()):
   # print(code)
@@ -32,39 +32,50 @@ for code in tqdm(stocks.code.tolist()):
   
   df_daily = ak.stock_zh_a_hist(symbol=code, period = "daily", start_date=start_day, end_date= end_day, adjust= 'qfq')
 
-  # df_daily = ak.stock_zh_a_hist(symbol="601225", period = "daily", start_date= "20221100", end_date="20230221")
+  # df_daily = ak.stock_zh_a_hist(symbol="605599", period = "daily", start_date = start_day, end_date = end_day)
   X = df_daily["收盘"]
 
   data = np.asarray(X)
 
-  pivots = my_zigzag(data)
-  if pivots.__len__() < 4:
+  pivots = get_wave(data)
+  if pivots.__len__() < 2:
     continue
   
-  indice =[]
-  for key, val in pivots.items():
-    indice.append(key)
+  # tech anaysis
+  #########catch third wave
+  if pivots.__len__() > 4:
+    wave_1_start = list(pivots.keys())[-5]
+    wave_1_end = list(pivots.keys())[-4]
+    wave_2_start = list(pivots.keys())[-3]
+    wave_2_end = list(pivots.keys())[-2]
+    wave_3_start = list(pivots.keys())[-1]
+  
+    if (data.__len__() - wave_3_start >= 1 and
+        data[wave_2_start] > data[wave_1_start] and data[wave_2_end] > data[wave_1_end] and data[wave_3_start] > data[wave_2_start] and
+        5 <  wave_2_start - wave_1_start and  wave_2_start - wave_1_start < 30 and 
+        5 <  wave_3_start - wave_2_start and  wave_3_start - wave_2_start < 30):  # 时间周期
+        # ignore high stock price
+        if data[wave_2_end] > 50:
+          continue
+        # wave should not too big
+        if ((data[wave_2_end] - data[wave_2_start]) / data[wave_2_start] > 0.3 or
+            (data[wave_1_end] - data[wave_1_start]) / data[wave_1_start] > 0.3):
+          continue
+        
+        # ignore low asset < 50 e
+        stock_individual_info_em_df = ak.stock_individual_info_em(symbol=code)
+        shizhi = stock_individual_info_em_df["value"][0]
+        if shizhi < 4500000000: # 45亿
+          continue
+        # ignore high price recent year
+        
+        uptrend_code.append(code)
+        
 
-  indice = np.asarray(indice)
-  pre_low_val = indice[-3]
-  last_high_val = indice[-2]
+for c in uptrend_code:
+  print(f"code {c}")
 
-  last_low_val = indice[-1]
-  rev_point = {}
-  if last_high_val > pre_low_val and last_high_val > last_low_val:
-    # 天数不能太久
-    if indice[-2] - indice[-3] < 20 and indice[-1] - indice[-2] < 20:
-      # 最近波动5个点
-      tail_data = data[indice[-2]:-1]
-      pivots_tail = my_zigzag(tail_data, 0.05)
-      ind_tail =[]
-      for key, val in pivots_tail.items():
-        ind_tail.append(key)
-      if pivots_tail.__len__() == 3 and pivots_tail[ind_tail[1]] < pivots_tail[-1]:
-        print("hello")
-        print(code)
 
-        rev_point[ind_tail[1]] = 0
         
 
   # plot_pivots(X, pivots)
