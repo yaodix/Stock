@@ -81,6 +81,7 @@ for code in tqdm(stocks.code.tolist()):
           # print(f"append {code}")
         
 
+# 如果确立趋势，找到走势最强，涨势最好的--sort  
 for c in uptrend_code:
   print(f"code {c}")
 
