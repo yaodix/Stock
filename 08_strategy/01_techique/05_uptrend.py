@@ -56,26 +56,29 @@ for code in tqdm(stocks.code.tolist()):
       continue
 
     if (data.__len__() - wave_3_start >= 2 and
-        data[wave_2_start] > data[wave_1_start] and data[wave_2_end] > data[wave_1_end] and data[wave_3_start] > data[wave_2_start] and
+        data[wave_2_start] > data[wave_1_start] and data[wave_2_end] > data[wave_1_end] and 
         5 <  wave_2_start - wave_1_start and  wave_2_start - wave_1_start < 30 and 
         5 <  wave_3_start - wave_2_start and  wave_3_start - wave_2_start < 30):  # 时间周期
-        # ignore high stock price
-        if data[wave_2_end] > 50:
-          continue
-        # wave should not too big
-        if ((data[wave_2_end] - data[wave_2_start]) / data[wave_2_start] > 0.3 or
-            (data[wave_1_end] - data[wave_1_start]) / data[wave_1_start] > 0.3):
-          continue
-        
-        # ignore low asset < 50 e
-        stock_individual_info_em_df = ak.stock_individual_info_em(symbol=code)
-        shizhi = stock_individual_info_em_df["value"][0]
-        if shizhi < 4500000000: # 45亿
-          continue
-        # ignore high price recent year
-        
-        uptrend_code.append(code)
-        print(f"append {code}")
+
+        # if data[wave_3_start] > data[wave_2_start] or (abs((data[wave_3_start] - data[wave_2_start])/ data[wave_2_start]) < 0.05 and ):
+        if data[wave_3_start] > data[wave_2_start]:
+          # ignore high stock price
+          if data[wave_2_end] > 50:
+            continue
+          # wave should not too big
+          if ((data[wave_2_end] - data[wave_2_start]) / data[wave_2_start] > 0.5 or  # 首次涨幅允许大一些
+              (data[wave_1_end] - data[wave_1_start]) / data[wave_1_start] > 0.3):
+            continue
+          
+          # ignore low asset < 50 e
+          stock_individual_info_em_df = ak.stock_individual_info_em(symbol=code)
+          shizhi = stock_individual_info_em_df["value"][0]
+          if shizhi < 4500000000: # 45亿
+            continue
+          # ignore high price recent year
+          
+          uptrend_code.append(code)
+          # print(f"append {code}")
         
 
 for c in uptrend_code:
