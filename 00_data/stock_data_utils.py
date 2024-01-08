@@ -69,4 +69,5 @@ def moving_average(x, w):
     half_w = int(w/2)
     tmp[:half_w] = x[:half_w]
     tmp[-half_w:] = x[-half_w:]
+    
     return tmp
