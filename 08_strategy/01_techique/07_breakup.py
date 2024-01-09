@@ -62,6 +62,10 @@ for code in tqdm(stocks.code.tolist()):
         if (data[wave_2_end] - data[wave_1_end])/data[wave_1_end] < 0.08: # second wave start is higher
           continue
         
+        # w_1_end near lowest value
+        min_value = np.min(data)
+        if abs(min_value - data[wave_1_end]) > 0.01:
+          continue     
         
         max_value = np.max(data[0:wave_1_end])
         if (max_value- data[wave_1_end]) / max_value > 0.45:  # 跌了多少
