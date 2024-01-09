@@ -1,4 +1,5 @@
 
+# 第一个反弹
 # 01_basic/02_my_zigzag.py
 import sys
 sys.path.append(r"/home/yao/myproject/Stock/01_basic")
@@ -32,9 +33,9 @@ for code in tqdm(stocks.code.tolist()):
   start_day = start_day.strftime("%Y%m%d")
   end_day = end_day.strftime("%Y%m%d")   
   
-  df_daily = ak.stock_zh_a_hist(symbol=code, period = "daily", start_date=start_day, end_date= end_day, adjust= 'qfq')
+  # df_daily = ak.stock_zh_a_hist(symbol=code, period = "daily", start_date=start_day, end_date= end_day, adjust= 'qfq')
 
-  # df_daily = ak.stock_zh_a_hist(symbol=code, period = "daily", start_date = "20230101", end_date = "20231201")
+  df_daily = ak.stock_zh_a_hist(symbol=code, period = "daily", start_date = "20230101", end_date = "20231201")
   X = df_daily["收盘"]
 
   data = np.asarray(X)
