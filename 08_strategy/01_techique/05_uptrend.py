@@ -1,4 +1,4 @@
-
+# 抓上升的第3波
 # 01_basic/02_my_zigzag.py
 import sys
 # sys.path.append(r"/home/yao/myproject/Stock/01_basic")
