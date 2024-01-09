@@ -59,6 +59,10 @@ for code in tqdm(stocks.code.tolist()):
         5 <  wave_2_end - wave_1_end and  wave_2_end - wave_1_end < 60 and 
         10 <  wave_1_end - wave_1_start):  # 时间周期
 
+        if (data[wave_2_end] - data[wave_1_end])/data[wave_1_end] < 0.08: # second wave start is higher
+          continue
+        
+        
         max_value = np.max(data[0:wave_1_end])
         if (max_value- data[wave_1_end]) / max_value > 0.45:  # 跌了多少
           # wave should not too 
@@ -66,19 +70,19 @@ for code in tqdm(stocks.code.tolist()):
           #             (data[wave_2_start] - data[wave_1_end]) / data[wave_1_end] < 0.6) :
           #   continue
           # ignore high stock price
-          # if data[wave_2_end] > 50:
-          #   continue
+          if data[wave_2_end] > 60:
+            continue
           
           # ignore low asset < 50 e
           stock_individual_info_em_df = ak.stock_individual_info_em(symbol=code)
           shizhi = stock_individual_info_em_df["value"][0]
-          # if shizhi < 4500000000: # 45亿
-          #   continue
+          if shizhi < 4500000000: # 45亿
+            continue
           # ignore high price recent year
           
           uptrend_code.append(code)
           # print(f"append {code}")
-          break
+          # break
         
 
 # 如果确立趋势，找到走势最强，涨势最好的--sort  
