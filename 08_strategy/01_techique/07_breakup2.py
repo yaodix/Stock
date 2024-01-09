@@ -34,14 +34,14 @@ for code in tqdm(stocks.code.tolist()):
   start_day = start_day.strftime("%Y%m%d")
   end_day = end_day.strftime("%Y%m%d")   
   
-  # df_daily = ak.stock_zh_a_hist(symbol=code, period = "daily", start_date=start_day, end_date= end_day, adjust= 'qfq')
+  df_daily = ak.stock_zh_a_hist(symbol=code, period = "daily", start_date=start_day, end_date= end_day, adjust= 'qfq')
 
-  df_daily = ak.stock_zh_a_hist(symbol=code, period = "daily", start_date = "20230101", end_date = "20231201")
+  # df_daily = ak.stock_zh_a_hist(symbol=code, period = "daily", start_date = "20230101", end_date = "20231201")
   X = df_daily["收盘"]
 
   data = np.asarray(X)
 
-  pivots = get_wave(data)
+  pivots = get_wave(data, 0.08)  # 8个点波动
   if pivots.__len__() < 2:
     continue
   
@@ -61,7 +61,7 @@ for code in tqdm(stocks.code.tolist()):
         5 <  wave_2_end - wave_1_end and  wave_2_end - wave_1_end < 60 and 
         10 <  wave_1_end - wave_1_start):  # 时间周期
 
-        if (data[wave_2_end] - data[wave_1_end])/data[wave_1_end] < 0.08: # second wave start is higher
+        if (data[wave_2_end] - data[wave_1_end])/data[wave_1_end] < 0.03: # second wave start is higher
           continue
         
         # w_1_end near lowest value

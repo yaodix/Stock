@@ -24,7 +24,7 @@ uptrend_code = []
 stocks = get_sh_sz_A_name()
 for code in tqdm(stocks.code.tolist()):
   # print(code)
-  # code = "601595"
+  code = "002129"
   end_day = dt.date(dt.date.today().year,dt.date.today().month,dt.date.today().day)
   days = long_time_days * 7 / 5
   #考虑到周六日非交易
@@ -33,34 +33,28 @@ for code in tqdm(stocks.code.tolist()):
   start_day = start_day.strftime("%Y%m%d")
   end_day = end_day.strftime("%Y%m%d")   
   
-  # df_daily = ak.stock_zh_a_hist(symbol=code, period = "daily", start_date=start_day, end_date= end_day, adjust= 'qfq')
+  df_daily = ak.stock_zh_a_hist(symbol=code, period = "daily", start_date=start_day, end_date= end_day, adjust= 'qfq')
 
-  df_daily = ak.stock_zh_a_hist(symbol=code, period = "daily", start_date = "20230101", end_date = "20231201")
+  # df_daily = ak.stock_zh_a_hist(symbol=code, period = "daily", start_date = "20230101", end_date = "20231201")
   X = df_daily["收盘"]
 
   data = np.asarray(X)
 
   pivots = get_wave(data)
-  if pivots.__len__() < 2:
-    continue
   
   # tech anaysis
   #########catch second wave
-  if pivots.__len__() > 4:
-    wave_1_start = list(pivots.keys())[-4]
-    wave_1_end = list(pivots.keys())[-3]
-    wave_2_start = list(pivots.keys())[-2]
-    wave_2_end = list(pivots.keys())[-1]
+  if pivots.__len__() > 3:
+    wave_1_start = list(pivots.keys())[-2]
+    wave_1_end = list(pivots.keys())[-1]
 
-    if pivots[wave_2_end] != -1: # 最后一个必须为价格低点
+    if pivots[wave_1_end] != -1: # 最后一个必须为价格低点
       continue
 
-    if (data.__len__() - wave_2_end >= 2 and
-        data[wave_2_start] < data[wave_1_start] and data[wave_2_end] > data[wave_1_end] and 
-        5 <  wave_2_end - wave_1_end and  wave_2_end - wave_1_end < 60 and 
-        10 <  wave_1_end - wave_1_start):  # 时间周期
+    if (2 <= (data.__len__()-1 - wave_1_end) and  (data.__len__() -1- wave_1_end) <= 5 and
+        60 <  wave_1_end - wave_1_start ):  # 时间周期
 
-        if (data[wave_2_end] - data[wave_1_end])/data[wave_1_end] < 0.08: # second wave start is higher
+        if (data[-1] - data[wave_1_end])/data[wave_1_end] < 0.04: # first wave start 
           continue
         
         # w_1_end near lowest value
@@ -69,13 +63,13 @@ for code in tqdm(stocks.code.tolist()):
           continue     
         
         max_value = np.max(data[0:wave_1_end])
-        if (max_value- data[wave_1_end]) / max_value > 0.45:  # 跌了多少
+        if (max_value- data[wave_1_end]) / max_value > 0.4:  # 跌了多少
           # wave should not too 
           # if  (0.1 < (data[wave_2_start] - data[wave_1_end]) / data[wave_1_end] and 
           #             (data[wave_2_start] - data[wave_1_end]) / data[wave_1_end] < 0.6) :
           #   continue
           # ignore high stock price
-          if data[wave_2_end] > 60:
+          if data[wave_1_end] > 60:
             continue
           
           # ignore low asset < 50 e
