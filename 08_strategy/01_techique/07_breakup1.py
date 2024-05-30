@@ -24,7 +24,7 @@ uptrend_code = []
 stocks = get_sh_sz_A_name()
 for code in tqdm(stocks.code.tolist()):
   # print(code)
-  code = "002129"
+  # code = "002129"
   end_day = dt.date(dt.date.today().year,dt.date.today().month,dt.date.today().day)
   days = long_time_days * 7 / 5
   #考虑到周六日非交易
