@@ -94,6 +94,6 @@ def DownloadSave(security_pool, pickle_file, years = 100):
 
 
 if __name__ == '__main__':
-  pickle_path = '/home/yao/myproject/Stock/51_10天系列/01_数据操作/df.pickle' 
+  pickle_path = './df.pickle' 
   df = GetSecurityCode()  
   DownloadSave(df, pickle_path)
