@@ -32,7 +32,7 @@ for code in tqdm(stocks.code.tolist()):
   start_day = start_day.strftime("%Y%m%d")
   end_day = end_day.strftime("%Y%m%d")   
   
-  df_daily = ak.stock_zh_a_hist(symbol=code, period = "daily", start_date=start_day, end_date= end_day, adjust= 'qfq')
+  df_daily = ak.stock_zh_a_hist(symbol=code, period = "daily", start_date="20231001", end_date= "20240531", adjust= 'qfq')
 
   # df_daily = ak.stock_zh_a_hist(symbol="002955", period = "daily", start_date = start_day, end_date = end_day)
   X = df_daily["收盘"]
@@ -52,7 +52,7 @@ for code in tqdm(stocks.code.tolist()):
     wave_2_end = list(pivots.keys())[-2]
     wave_3_start = list(pivots.keys())[-1]
 
-    if pivots[wave_3_start] != -1: # 最好一个必须为价格低点
+    if pivots[wave_3_start] != -1: # 最后一个必须为价格低点
       continue
 
     if (data.__len__() - wave_3_start >= 2 and
@@ -66,8 +66,8 @@ for code in tqdm(stocks.code.tolist()):
           if data[wave_2_end] > 50:
             continue
           # wave should not too big
-          if ((data[wave_2_end] - data[wave_2_start]) / data[wave_2_start] > 0.5 or  # 首次涨幅允许大一些
-              (data[wave_1_end] - data[wave_1_start]) / data[wave_1_start] > 0.3):
+          if ((data[wave_2_end] - data[wave_2_start]) / data[wave_2_start] > 0.6 or  # 首次涨幅允许大一些
+              (data[wave_1_end] - data[wave_1_start]) / data[wave_1_start] > 0.5):
             continue
           
           # ignore low asset < 50 e
