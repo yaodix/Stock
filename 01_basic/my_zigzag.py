@@ -1,6 +1,6 @@
 # 20230704
 # python 3.8+
-
+from scipy import interpolate
 import akshare as ak
 import numpy as np
 import pandas as pd
@@ -25,20 +25,34 @@ def plot_pivots(X, pivots):
       
     plt.scatter(high_idx, X[high_idx], color='r')
     plt.scatter(low_idx, X[low_idx], color='g')
+    
+    ### fit low pivots
+    # keep only -1 values
+    low_pivots_index = [k for k, v in pivots.items() if v == -1]
+    y = data[low_pivots_index]
+    x = low_pivots_index
+
+    data_cnt = len(X)
+    data_range = range(0, data_cnt) 
+    akima_interpolator = interpolate.Akima1DInterpolator(x, y)
+    x_fit = np.linspace(min(data_range), max(data_range), data_cnt*2)
+    y_fit = akima_interpolator(x_fit)
+    plt.plot(x_fit, y_fit,'b')
+    
   
-def get_wave(data, valid_thresh = 0.1):
+def get_pivots(data, valid_thresh = 0.1):
   '''
-    data is 收盘价  
-    valid_thresh: 比例
+    data: Close array
+    valid_thresh: ratio threshold
   '''
   pivots = {}  # -1:low,1:high
-  last_trend = 0 # -1: low, 1: high, 记录最后依次趋势的
+  last_trend = 0 # -1: low, 1: high, 记录最后一次的趋势
   first_trend_finded = False
   to_find_up_trend = False
   to_find_down_trend = False
   range_data = np.asarray(data)
   diff = np.diff(range_data)
-  diff = np.insert(diff, 0,0)
+  diff = np.insert(diff, 0, 0)
   diff = diff / range_data
   sum_res_n = np.zeros_like(diff) # 用于找最大负值
   sum_res_p = np.zeros_like(diff) # 用于找最大正值
@@ -136,18 +150,19 @@ test_data_2 = np.array([1, 0.8, 1.2, 1, 0.5, 1.5, 1.8, 1.0, 1.03])
   
 if __name__ == "__main__":
   # 下载个股日k数据图
-  df_daily = ak.stock_zh_a_hist(symbol="002952", period = "daily", start_date= "20230131", end_date="20231227")
-  # t_df_daily = ak.stock_zh_a_hist(symbol="002507", period = "daily", start_date= "20230102", end_date="20231215")
-  print(df_daily.tail())
+  # df_daily = ak.stock_zh_a_hist(symbol="002952", period = "daily", start_date= "20230101", end_date="20240531")
+  df_daily = ak.stock_zh_a_hist(symbol="002507", period = "daily", start_date= "20230102", end_date="20241215")
+  # print(df_daily.tail())
   
-  # data_val = df_daily[["日期", "收盘"]]
   X = df_daily["收盘"]
 
   data = np.asarray(X)    
   # data = test_data_1
-  pivots = get_wave(data, 0.1)
+  pivots = get_pivots(data, 0.1)
   print(pivots)
+  print(data[list(pivots.keys())])
   plot_pivots(data, pivots)
+  
   plt.show()
 
 
