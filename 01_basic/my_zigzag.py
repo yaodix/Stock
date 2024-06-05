@@ -1,3 +1,4 @@
+
 # 20230704
 # python 3.8+
 from scipy import interpolate
@@ -40,10 +41,10 @@ def plot_pivots(X, pivots):
     plt.plot(x_fit, y_fit,'b')
     
   
-def get_pivots(data, valid_thresh = 0.1):
+def get_pivots(data, raise_thresh = 0.1, fall_thresh = 0.7):
   '''
     data: Close array
-    valid_thresh: ratio threshold
+    raise_thresh: raise ratio threshold
   '''
   pivots = {}  # -1:low,1:high
   last_trend = 0 # -1: low, 1: high, 记录最后一次的趋势
@@ -70,7 +71,7 @@ def get_pivots(data, valid_thresh = 0.1):
       max_range = max(max_range, sum_res_p[idx])
       min_range = min(min_range, sum_res_n[idx])
       # print(idx)
-      if max_range >= valid_thresh:
+      if max_range >= raise_thresh:
         # 往回找到涨幅起点
         for back_idx in range(idx, -1, -1):
           back_sum = back_sum + diff[back_idx]
@@ -82,7 +83,7 @@ def get_pivots(data, valid_thresh = 0.1):
             min_range = 0
             last_trend = 1
             break
-      if min_range <= -valid_thresh:
+      if min_range <= -fall_thresh:
         # 往回找到跌幅起点
         back_sum = 0        
         for back_idx in range(idx, -1, -1):
@@ -100,7 +101,7 @@ def get_pivots(data, valid_thresh = 0.1):
       sum_res_p[idx] = max(diff[idx], sum_res_p[idx-1]+diff[idx])
       max_range = max(max_range, sum_res_p[idx])
       
-      if max_range >= valid_thresh:
+      if max_range >= raise_thresh:
         # 往回找到涨幅起点
         back_sum = 0        
         for back_idx in range(idx, -1, -1):
@@ -118,7 +119,7 @@ def get_pivots(data, valid_thresh = 0.1):
       sum_res_n[idx] = min(diff[idx], sum_res_n[idx-1]+diff[idx])
       min_range = min(min_range, sum_res_n[idx])
 
-      if min_range <= -valid_thresh:
+      if min_range <= -fall_thresh:
         # 往回找到跌幅起点
         back_sum = 0        
         for back_idx in range(idx, -1, -1):
@@ -151,14 +152,14 @@ test_data_2 = np.array([1, 0.8, 1.2, 1, 0.5, 1.5, 1.8, 1.0, 1.03])
 if __name__ == "__main__":
   # 下载个股日k数据图
   # df_daily = ak.stock_zh_a_hist(symbol="002952", period = "daily", start_date= "20230101", end_date="20240531")
-  df_daily = ak.stock_zh_a_hist(symbol="002507", period = "daily", start_date= "20230102", end_date="20241215")
+  df_daily = ak.stock_zh_a_hist(symbol="000426", period = "daily", start_date= "20230102", end_date="20241215")
   # print(df_daily.tail())
   
   X = df_daily["收盘"]
 
   data = np.asarray(X)    
   # data = test_data_1
-  pivots = get_pivots(data, 0.1)
+  pivots = get_pivots(data, 0.1, 0.075)
   print(pivots)
   print(data[list(pivots.keys())])
   plot_pivots(data, pivots)

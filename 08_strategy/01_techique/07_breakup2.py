@@ -3,10 +3,10 @@
 
 # 01_basic/02_my_zigzag.py
 import sys
-sys.path.append(r"/home/yao/myproject/Stock/01_basic")
-sys.path.append(r"/home/yao/myproject/Stock/00_data")
-# sys.path.append(r"/home/yao/workspace/Stock/01_basic")
-# sys.path.append(r"/home/yao/workspace/Stock/00_data")
+# sys.path.append(r"/home/yao/myproject/Stock/01_basic")
+# sys.path.append(r"/home/yao/myproject/Stock/00_data")
+sys.path.append(r"/home/yao/workspace/Stock/01_basic")
+sys.path.append(r"/home/yao/workspace/Stock/00_data")
 import akshare as ak
 import numpy as np
 import pandas as pd

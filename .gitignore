@@ -159,4 +159,5 @@ cython_debug/
 #  option (not recommended) you can uncomment the following to ignore the entire idea folder.
 #.idea/
 
-51_10天系列/01_数据操作/df.pickle
+51_10天系列/01_数据操作/*.pickle
+51_10天系列/01_数据操作/workdata
