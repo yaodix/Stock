@@ -27,19 +27,34 @@ def plot_pivots(X, pivots):
     plt.scatter(high_idx, X[high_idx], color='r')
     plt.scatter(low_idx, X[low_idx], color='g')
     
-    ### fit low pivots
-    # keep only -1 values
-    low_pivots_index = [k for k, v in pivots.items() if v == -1]
-    y = data[low_pivots_index]
-    x = low_pivots_index
-
-    data_cnt = len(X)
-    data_range = range(0, data_cnt) 
-    akima_interpolator = interpolate.Akima1DInterpolator(x, y)
-    x_fit = np.linspace(min(data_range), max(data_range), data_cnt*2)
-    y_fit = akima_interpolator(x_fit)
-    plt.plot(x_fit, y_fit,'b')
     
+def plot_pivot_line(X, pivots, enable_support = True, enable_resistance = True):
+      ### fit low pivots
+    # keep only -1 values
+    if enable_support:
+      low_pivots_index = [k for k, v in pivots.items() if v == -1]
+      y = X[low_pivots_index]
+      x = low_pivots_index
+
+      data_cnt = len(X)
+      data_range = range(0, data_cnt) 
+      akima_interpolator = interpolate.Akima1DInterpolator(x, y)
+      x_fit = np.linspace(min(data_range), max(data_range), data_cnt*2)
+      y_fit = akima_interpolator(x_fit)
+      plt.plot(x_fit, y_fit,'b')
+    if enable_resistance:
+      low_pivots_index = [k for k, v in pivots.items() if v == 1]
+      y = X[low_pivots_index]
+      x = low_pivots_index
+
+      data_cnt = len(X)
+      data_range = range(0, data_cnt) 
+      akima_interpolator = interpolate.Akima1DInterpolator(x, y)
+      x_fit = np.linspace(min(data_range), max(data_range), data_cnt*2)
+      y_fit = akima_interpolator(x_fit)
+      plt.plot(x_fit, y_fit,'r')
+
+  
   
 def get_pivots(data, raise_thresh = 0.1, fall_thresh = 0.7):
   '''
@@ -152,17 +167,19 @@ test_data_2 = np.array([1, 0.8, 1.2, 1, 0.5, 1.5, 1.8, 1.0, 1.03])
 if __name__ == "__main__":
   # 下载个股日k数据图
   # df_daily = ak.stock_zh_a_hist(symbol="002952", period = "daily", start_date= "20230101", end_date="20240531")
-  df_daily = ak.stock_zh_a_hist(symbol="000426", period = "daily", start_date= "20230102", end_date="20241215")
+  df_daily = ak.stock_zh_a_hist(symbol="002182", period = "daily", start_date= "20230102", end_date="20241215")
   # print(df_daily.tail())
   
   X = df_daily["收盘"]
 
   data = np.asarray(X)    
   # data = test_data_1
-  pivots = get_pivots(data, 0.1, 0.075)
+  pivots = get_pivots(data, 0.06, 0.06)
   print(pivots)
   print(data[list(pivots.keys())])
+  fig = plt.figure()
   plot_pivots(data, pivots)
+  plot_pivot_line(data, pivots)
   
   plt.show()
 
