@@ -4,8 +4,8 @@
 # filter by slope of pivot
 
 import sys
-sys.path.append(r"/home/yao/myproject/Stock/01_basic")
-sys.path.append(r"/home/yao/myproject/Stock/00_data")
+sys.path.append(r"/home/yao/workspace/Stock/01_basic")
+sys.path.append(r"/home/yao/workspace/Stock/00_data")
 
 import akshare as ak
 import numpy as np
@@ -31,7 +31,9 @@ def filter_pivot_line(src_data, pivots, k_thresh, verbose = False):
   k_res_last1 = (src_data[high_pivots_index[-1]] - src_data[high_pivots_index[-2]]) / (high_pivots_index[-1] - high_pivots_index[-2])
   if verbose:
     print(f"k_sup_last1 {k_sup_last1}, k_sup_last2 {k_sup_last2}, k_res_last1 {k_res_last1}")
-
+  # 增加涨幅比例限制
+    
+  # 两边时间间隔，不要差太多
   if k_thresh < k_sup_last1  and  k_thresh < k_sup_last2  and  \
      k_thresh < k_res_last1 and k_res_last1 < max(k_sup_last1, k_sup_last2)+0.1 and \
      1 < abs(low_pivots_index[-1] - high_pivots_index[-1]) and  abs(low_pivots_index[-1] - high_pivots_index[-1]) < 15 and \
@@ -46,7 +48,7 @@ if __name__ == "__main__":
   stocks = get_sh_sz_A_name()
   for code in tqdm(stocks.code.tolist()):
     # df_daily = ak.stock_zh_a_hist(symbol="002952", period = "daily", start_date= "20230101", end_date="20240531")
-    df_daily = ak.stock_zh_a_hist(symbol=code, period = "daily", start_date= "20230102", end_date="20241215")
+    df_daily = ak.stock_zh_a_hist(symbol=code, period = "daily", start_date= "20240102", end_date="20241215")
     
     X = df_daily["收盘"]
     data = np.asarray(X)    
