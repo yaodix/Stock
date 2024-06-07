@@ -83,9 +83,8 @@ def DownloadSave(security_pool, pickle_file, years = 100):
     end_day = end_day.strftime("%Y%m%d")   
     
     df_daily = ak.stock_zh_a_hist(symbol=code, period = "daily", start_date=start_day, end_date= end_day, adjust= 'qfq')
-    df_weekly = ak.stock_zh_a_hist(symbol=code, period = "weekly", start_date=start_day, end_date= end_day, adjust= 'qfq')
+    # df_weekly = ak.stock_zh_a_hist(symbol=code, period = "weekly", start_date=start_day, end_date= end_day, adjust= 'qfq')
     
-    # df_daily.to_pickle(pickle_file)
     df_dict[code] = df_daily
     
   with open(pickle_file, 'wb') as handle:
@@ -95,6 +94,6 @@ def DownloadSave(security_pool, pickle_file, years = 100):
 
 
 if __name__ == '__main__':
-  pickle_path = './df.pickle' 
+  pickle_path = './df_0606.pickle' 
   df = GetSecurityCode()  
   DownloadSave(df, pickle_path)
