@@ -71,23 +71,26 @@ def long_buy(src_data, pivots):
   return True
   
   
+def long_sell(src_data, pivots):
+  pass
   
 
 if __name__ == "__main__":
   pickle_path = '/home/yao/myproject/Stock/51_10天系列/01_数据操作/df_0606.pickle' 
   df_dict = LoadPickleData(pickle_path)
   for code, val in tqdm(df_dict.items()):
-    if "603713" not in code:
-      continue
+    # if "603713" not in code:
+      # continue
     # val.drop([len(val)-1],inplace=True)
 
     end_day = dt.date(dt.date.today().year,dt.date.today().month,dt.date.today().day)
     end_day = end_day.strftime("%Y%m%d")   
-    # val = ak.stock_zh_a_hist(symbol=code, period = "daily", adjust= 'qfq')
-    # print(val.tail())
     start_date_str = '01-01-2024'
-
     start_day = dt.datetime.strptime(start_date_str, '%m-%d-%Y').date()
+    val = ak.stock_zh_a_hist(symbol=code, start_date=start_day, period = "daily", adjust= 'qfq')
+    # print(val.tail())
+    
+    
     df_daily = val[val["日期"]> start_day]
     
     X = df_daily["收盘"]
@@ -107,6 +110,6 @@ if __name__ == "__main__":
       plt.clf()
       plot_pivots(data, pivots)
       plot_pivot_line(data, pivots)
-      plt.savefig('./workdata/'+code + '.jpg')
+      plt.savefig('./workdata/'+code + '_0607.jpg')
       # break
       # plt.show()

@@ -5,7 +5,8 @@ import datetime as dt
 from  tqdm import tqdm
 
 import matplotlib.pyplot as plt
-
+import os
+import pickle
 
 def get_sh_sz_A_name():
 # 获取所有深A,沪A股市代码,过滤ST，新股、次新股
@@ -61,13 +62,12 @@ def get_sh_sz_A_name():
   return df   
 
 
-def moving_average(x, w):
-    '''
-    w = 5, 5日均线
-    '''
-    tmp = np.convolve(x, np.ones(w), 'same') / w
-    half_w = int(w/2)
-    tmp[:half_w] = x[:half_w]
-    tmp[-half_w:] = x[-half_w:]
+def LoadPickleData(pickle_path):
+  if not os.path.exists(pickle_path):
+    print("no file " + pickle_path)
+    return
     
-    return tmp
+  with open(pickle_path, 'rb') as handle:
+      df_dict = pickle.load(handle) 
+  
+  return df_dict
