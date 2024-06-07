@@ -29,7 +29,7 @@ def LoadData(pickle_path):
   return df_dict
 
 
-def get_stock_data_eastmoney(code, df_one, start_date="20200630", end_date="20240530"):
+def show_stock_data_eastmoney(code, df_one, start_date="20200630", end_date="20240530"):
   # 将日期列设置为索引，并转换为 datetime 类型
 
   df_one['日期'] = pd.to_datetime(df_one['日期'])
@@ -76,7 +76,7 @@ if __name__ == '__main__':
     end_day = dt.date(dt.date.today().year,dt.date.today().month,dt.date.today().day)
     end_day = end_day.strftime("%Y%m%d")   
 
-    get_stock_data_eastmoney(key, val, "20240101", end_day)
+    show_stock_data_eastmoney(key, val, "20240101", end_day)
     # input()
     # plt.close('all')
     
