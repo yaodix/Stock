@@ -146,7 +146,10 @@ def get_pivots(data, raise_thresh = 0.1, fall_thresh = 0.7):
             min_range = 0
             max_range = 0
             last_trend = -1            
-            break     
+            break  
+  if len(pivots) < 1:
+    return pivots
+     
   if last_trend == 1: # 最后一波是涨幅，
     start_key = sorted(pivots.keys())[-1]
     last_idx = np.argmax(data[start_key:])
