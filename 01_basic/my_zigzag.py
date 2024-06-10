@@ -56,7 +56,7 @@ def plot_pivot_line(X, pivots, enable_support = True, enable_resistance = True):
 
   
   
-def get_pivots(data, raise_thresh = 0.1, fall_thresh = 0.7):
+def get_pivots(data, raise_thresh = 0.1, fall_thresh = 0.07):
   '''
     data: Close array
     raise_thresh: raise ratio threshold

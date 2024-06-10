@@ -163,18 +163,25 @@ def get_pivots(data, raise_thresh = 0.1, fall_thresh = 0.7):
 # 添加测试用例
 test_data_1 = np.array([1, 1.2, 1, 0.8, 1.5, 1.8, 1.74])
 test_data_2 = np.array([1, 0.8, 1.2, 1, 0.5, 1.5, 1.8, 1.0, 1.03])
+
+# code : start_data, end_data 
+# security_test = {{"002182":["20240524"]}}
+# security_test = {{"002182":["20240516"]}}
+# security_test = {{"002182":["20240423"]}}
   
 if __name__ == "__main__":
   # 下载个股日k数据图
   # df_daily = ak.stock_zh_a_hist(symbol="002952", period = "daily", start_date= "20230101", end_date="20240531")
-  df_daily = ak.stock_zh_a_hist(symbol="002182", period = "daily", start_date= "20230102", end_date="20241215")
+  df_daily = ak.stock_zh_a_hist(symbol="002648", period = "weekly", start_date= "20220102", end_date="20240523", adjust='qfq')
   # print(df_daily.tail())
   
   X = df_daily["收盘"]
 
   data = np.asarray(X)    
   # data = test_data_1
-  pivots = get_pivots(data, 0.06, 0.06)
+  weekly_raise_thresh = 0.2
+  weekly_fail_thresh = 0.15
+  pivots = get_pivots(data, weekly_raise_thresh, weekly_fail_thresh)
   print(pivots)
   print(data[list(pivots.keys())])
   
