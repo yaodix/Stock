@@ -13,8 +13,7 @@ import matplotlib.pyplot as plt
 
 def GetSecurityCode():
   '''
-  获取所有深A,沪A股市代码,过滤ST，新股、次新股
-
+  获取所有深A,沪A股市代码,过滤ST、新股、次新股
   '''
   list = []
 
@@ -67,7 +66,7 @@ def GetSecurityCode():
         code   name
 0     000001   pinganyh
 '''
-def DownloadSave(security_pool, pickle_file, years = 100):
+def dump(security_pool, pickle_file, years = 100):
   pool = []
   if isinstance(security_pool,list):
     pool = security_pool
@@ -94,6 +93,6 @@ def DownloadSave(security_pool, pickle_file, years = 100):
 
 
 if __name__ == '__main__':
-  pickle_path = './df_0606.pickle' 
+  pickle_path = './df_0607.pickle' 
   df = GetSecurityCode()  
-  DownloadSave(df, pickle_path)
+  dump(df, pickle_path)
