@@ -75,12 +75,31 @@ def daily_raise_long_buy(src_data, pivots):
       return False
     # TODO: 涨的时间和幅度来排序
     
-  # 最近半年股票在涨势，且最大回撤不超过30%
-    # half_year_pre_index = -5*15
-    # if len(src_data) < 100:
-    #   half_year_pre_index = 0
-    # if src_data[-1] < src_data[half_year_pre_index]:
-    #   return False
+  # 最近3个低点抬升
+  low_pivots_index = [k for k, v in pivots.items() if v == -1]
+  if (len(low_pivots_index) < 3):
+    return False
+  if (len(low_pivots_index) < 3):
+    return False
+  
+  high_pivots_index = [k for k, v in pivots.items() if v == 1]
+  if (len(high_pivots_index) < 3):
+    return False
+
+  if src_data[low_pivots_index[-1]] < src_data[low_pivots_index[-2]] or \
+     src_data[low_pivots_index[-2]] < src_data[low_pivots_index[-3]] :
+    return False
+  
+  if src_data[high_pivots_index[-1]] < src_data[high_pivots_index[-2]] or \
+     src_data[high_pivots_index[-2]] < src_data[high_pivots_index[-3]] :
+    return False
+
+  # # 最近半年股票在涨势，且最大回撤不超过30%
+  #   half_year_pre_index = -5*15
+  #   if len(src_data) < 100:
+  #     half_year_pre_index = 0
+  #   if src_data[-1] < src_data[half_year_pre_index]:
+  #     return False
   
   return True
   
@@ -195,16 +214,16 @@ if __name__ == "__main__":
   pickle_path = '/home/yao/workspace/Stock/51_10天系列/01_数据操作/df_0607.pickle' 
   df_dict = LoadPickleData(pickle_path)
   for code, val in tqdm(df_dict.items()):
-    if code < "000400":
-      continue
+    # if code < "000400":
+    #   continue
     # val.drop([len(val)-1],inplace=True)
 
     end_day = dt.date(dt.date.today().year,dt.date.today().month,dt.date.today().day)
     end_day = end_day.strftime("%Y%m%d")   
-    start_date_str = '01-01-2023'
+    start_date_str = '10-01-2023'
     start_day = dt.datetime.strptime(start_date_str, '%m-%d-%Y').date()
     # val = ak.stock_zh_a_hist(symbol=code, start_date=start_day, end_date="20240507" ,period = "weekly", adjust= 'qfq')
-    val = ak.stock_zh_a_hist(symbol=code, start_date=start_day, end_date="20240507" ,period = "daily", adjust= 'qfq')
+    val = ak.stock_zh_a_hist(symbol=code, start_date=start_day, end_date="20241207" ,period = "daily", adjust= 'qfq')
     # print(val.tail())
     
     
@@ -212,8 +231,8 @@ if __name__ == "__main__":
     
     X = df_daily["收盘"]
     data = np.asarray(X)    
-    daily_raise_thresh_val = 0.07
-    daily_fail_thresh_val = 0.045
+    daily_raise_thresh_val = 0.08
+    daily_fail_thresh_val = 0.06
     weekly_raise_thresh_val = 0.15
     weekly_fail_thresh_val = 0.15
     pivots = get_pivots(data, daily_raise_thresh_val, daily_fail_thresh_val)
@@ -234,6 +253,6 @@ if __name__ == "__main__":
       plt.clf()
       plot_pivots(data, pivots)
       plot_pivot_line(data, pivots)
-      plt.savefig('./workdata/'+code + '_230807whor.jpg')
+      plt.savefig('./workdata/'+code + '_240613.jpg')
       # break
       # plt.show()
