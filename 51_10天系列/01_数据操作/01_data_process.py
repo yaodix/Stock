@@ -22,9 +22,9 @@ def GetSecurityCode():
   total_codes = stock_info_a_code_name_df['code'].tolist()
 
           
-  #非科创板、非创业板、非北京
+  #非科创板、非北京
   for code in total_codes:
-      if code[:2] == '60' or code[:1] == '0':
+      if code[:2] == '60' or code[:1] == '0' or code[:2] == '30':
           list.append(code)
 
   # 非退市
@@ -93,6 +93,6 @@ def dump(security_pool, pickle_file, years = 100):
 
 
 if __name__ == '__main__':
-  pickle_path = './df_0607.pickle' 
+  pickle_path = './df_0702.pickle' 
   df = GetSecurityCode()  
   dump(df, pickle_path)
