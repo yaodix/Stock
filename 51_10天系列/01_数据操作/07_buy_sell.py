@@ -4,8 +4,8 @@
 # filter by slope of pivot
 
 import sys
-sys.path.append(r"/home/yao/workspace/Stock/01_basic")
-sys.path.append(r"/home/yao/workspace/Stock/00_data")
+sys.path.append(r"/home/yao/myproject/Stock/01_basic")
+sys.path.append(r"/home/yao/myproject/Stock/00_data")
 
 import akshare as ak
 import numpy as np
@@ -76,11 +76,11 @@ def daily_raise_long_buy(src_data, pivots):
     # TODO: 涨的时间和幅度来排序
     
   # 最近半年股票在涨势，且最大回撤不超过30%
-    # half_year_pre_index = -5*15
-    # if len(src_data) < 100:
-    #   half_year_pre_index = 0
-    # if src_data[-1] < src_data[half_year_pre_index]:
-    #   return False
+    half_year_pre_index = -5*15
+    if len(src_data) < 100:
+      half_year_pre_index = 0
+    if src_data[-1] < src_data[half_year_pre_index]:
+      return False
   
   return True
   
@@ -192,19 +192,19 @@ def long_sell(src_data, pivots):
   
 
 if __name__ == "__main__":
-  pickle_path = '/home/yao/workspace/Stock/51_10天系列/01_数据操作/df_0607.pickle' 
+  pickle_path = '/home/yao/myproject/Stock/51_10天系列/01_数据操作/df_0702.pickle' 
   df_dict = LoadPickleData(pickle_path)
   for code, val in tqdm(df_dict.items()):
-    if code < "000400":
-      continue
-    # val.drop([len(val)-1],inplace=True)
+    # if code < "000400":
+    #   continue
+    val.drop([len(val)-1],inplace=True)
 
     end_day = dt.date(dt.date.today().year,dt.date.today().month,dt.date.today().day)
     end_day = end_day.strftime("%Y%m%d")   
-    start_date_str = '01-01-2023'
+    start_date_str = '01-01-2024'
     start_day = dt.datetime.strptime(start_date_str, '%m-%d-%Y').date()
     # val = ak.stock_zh_a_hist(symbol=code, start_date=start_day, end_date="20240507" ,period = "weekly", adjust= 'qfq')
-    val = ak.stock_zh_a_hist(symbol=code, start_date=start_day, end_date="20240507" ,period = "daily", adjust= 'qfq')
+    # val = ak.stock_zh_a_hist(symbol=code, start_date=start_day, end_date="20240701" ,period = "daily", adjust= 'qfq')
     # print(val.tail())
     
     
@@ -212,8 +212,8 @@ if __name__ == "__main__":
     
     X = df_daily["收盘"]
     data = np.asarray(X)    
-    daily_raise_thresh_val = 0.07
-    daily_fail_thresh_val = 0.045
+    daily_raise_thresh_val = 0.09
+    daily_fail_thresh_val = 0.06
     weekly_raise_thresh_val = 0.15
     weekly_fail_thresh_val = 0.15
     pivots = get_pivots(data, daily_raise_thresh_val, daily_fail_thresh_val)
@@ -234,6 +234,6 @@ if __name__ == "__main__":
       plt.clf()
       plot_pivots(data, pivots)
       plot_pivot_line(data, pivots)
-      plt.savefig('./workdata/'+code + '_230807whor.jpg')
+      plt.savefig('./workdata/'+code + '_2340613.jpg')
       # break
       # plt.show()
