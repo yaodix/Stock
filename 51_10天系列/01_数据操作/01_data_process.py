@@ -68,7 +68,7 @@ def GetSecurityCode():
 '''
 def dump(security_pool, pickle_file, years = 100):
   pool = []
-  if isinstance(security_pool,list):
+  if isinstance(security_pool, list):
     pool = security_pool
   else:
     pool = security_pool.code.tolist()
@@ -88,7 +88,6 @@ def dump(security_pool, pickle_file, years = 100):
     
   with open(pickle_file, 'wb') as handle:
     pickle.dump(df_dict, handle, protocol=pickle.HIGHEST_PROTOCOL)
-
 
 
 

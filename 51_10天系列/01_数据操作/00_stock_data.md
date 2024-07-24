@@ -10,6 +10,8 @@
 
 ### 数据基本处理
 
+读写
+
 增
 
 删
@@ -18,12 +20,23 @@
 
 查
 
-读写
+#### 常用lib
+
+* pandas
+* numpy
+* datetime
+* pickle
+
+#### 示例：保存指定板块的历史数据
 
 
 ### 数据绘制
 
 常用绘制python包
+
+* matplot
+  * mplfinance
+
 
 
 ### 数据处理
@@ -31,7 +44,6 @@
 zigzag提取
 
 support pressure
-
 
 find zigzag
 
