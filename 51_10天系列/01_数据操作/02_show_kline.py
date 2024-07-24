@@ -13,8 +13,6 @@ import mplfinance as mpf
 import tqdm as tqdm
 
 # 设置 Matplotlib 支持中文显示
-# plt.rcParams['font.sans-serif'] = ['Microsoft YaHei'] # 设置中文字体，确保中文能够正常显示
-# plt.rcParams['axes.unicode_minus'] = False # 解决负号 '-' 显示为方块的问题
 
 plt.ion()
 
