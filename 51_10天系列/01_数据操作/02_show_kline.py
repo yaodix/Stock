@@ -12,7 +12,6 @@ import pickle
 import mplfinance as mpf
 import tqdm as tqdm
 
-# 设置 Matplotlib 支持中文显示
 
 plt.ion()
 
@@ -48,7 +47,6 @@ def show_stock_data_eastmoney(code, df_one, start_date="20200630", end_date="202
 
   # 定义 mplfinance 的自定义风格
   mc = mpf.make_marketcolors(up='r', down='g', volume='inherit')
-  # s = mpf.make_mpf_style(base_mpf_style='charles', marketcolors=mc, rc={'font.sans-serif': ['Microsoft YaHei']}) # 
   s = mpf.make_mpf_style(base_mpf_style='charles', marketcolors=mc) # 
 
   # 使用 mplfinance 绘制 K 线图，并应用自定义风格
@@ -60,22 +58,24 @@ def show_stock_data_eastmoney(code, df_one, start_date="20200630", end_date="202
        volume=True,
       #  mav=(5,20,250),
        show_nontrading=False,
-       savefig=dict(fname=fig_name,dpi=100,pad_inches=0.25))
+      #  savefig=dict(fname=fig_name,dpi=100,pad_inches=0.25)
+       )
+  
    
 if __name__ == '__main__':
-  pickle_path = '/home/yao/workspace/Stock/51_10天系列/01_数据操作/df_hs_daily.pickle' 
+  pickle_path = '/home/yao/workspace/Stock/51_10天系列/01_数据操作/df_0707.pickle' 
   df_dict = LoadData(pickle_path)
   
   for key, val in tqdm.tqdm(df_dict.items()):
     # filter
-    if val.iloc[-1]['收盘'] / val.iloc[-30]['收盘'] < 1.1:
-      continue
+    # if val.iloc[-1]['收盘'] / val.iloc[-30]['收盘'] < 1.1:
+      # continue
 
     end_day = dt.date(dt.date.today().year,dt.date.today().month,dt.date.today().day)
     end_day = end_day.strftime("%Y%m%d")   
 
     show_stock_data_eastmoney(key, val, "20240101", end_day)
-    # input()
-    # plt.close('all')
+    input()
+    plt.close('all')
     
     

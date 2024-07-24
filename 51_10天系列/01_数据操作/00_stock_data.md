@@ -29,15 +29,14 @@
 
 #### 示例：保存指定板块的历史数据
 
-
 ### 数据绘制
 
 常用绘制python包
 
 * matplot
-  * mplfinance
+  * mplfinanc
 
-
+https://blog.csdn.net/Shepherdppz/article/details/117575286
 
 ### 数据处理
 
