@@ -4,8 +4,8 @@
 # filter by slope of pivot
 
 import sys
-sys.path.append(r"/home/yao/myproject/Stock/01_basic")
-sys.path.append(r"/home/yao/myproject/Stock/00_data")
+sys.path.append(r"/home/yao/workspace/Stock/01_basic")
+sys.path.append(r"/home/yao/workspace/Stock/00_data")
 
 import akshare as ak
 import numpy as np
@@ -211,7 +211,7 @@ def long_sell(src_data, pivots):
   
 
 if __name__ == "__main__":
-  pickle_path = '/home/yao/myproject/Stock/51_10天系列/01_数据操作/df_0702.pickle' 
+  pickle_path = '/home/yao/workspace/Stock/51_10天系列/01_数据操作/df_0707.pickle' 
   df_dict = LoadPickleData(pickle_path)
   for code, val in tqdm(df_dict.items()):
     # if code < "000400":
@@ -253,6 +253,6 @@ if __name__ == "__main__":
       plt.clf()
       plot_pivots(data, pivots)
       plot_pivot_line(data, pivots)
-      plt.savefig('./workdata/'+code + '_240613.jpg')
+      plt.savefig('./workdata/'+code + '.jpg')
       # break
       # plt.show()
