@@ -1,4 +1,7 @@
 
+'''
+筛选股票和保存股票数据
+'''
 import akshare as ak
 import os
 import numpy as np
@@ -62,10 +65,6 @@ def GetSecurityCode():
   return df     
 
 # 下载指定所有
-'''
-        code   name
-0     000001   pinganyh
-'''
 def dump(security_pool, pickle_file, years = 100):
   pool = []
   if isinstance(security_pool, list):
@@ -88,7 +87,6 @@ def dump(security_pool, pickle_file, years = 100):
     
   with open(pickle_file, 'wb') as handle:
     pickle.dump(df_dict, handle, protocol=pickle.HIGHEST_PROTOCOL)
-
 
 
 if __name__ == '__main__':

@@ -12,7 +12,6 @@ import pickle
 import mplfinance as mpf
 import tqdm as tqdm
 
-
 plt.ion()
 
 def LoadData(pickle_path):
@@ -24,7 +23,6 @@ def LoadData(pickle_path):
       df_dict = pickle.load(handle) 
   
   return df_dict
-
 
 def show_stock_data_eastmoney(code, df_one, start_date="20200630", end_date="20240530"):
   # 将日期列设置为索引，并转换为 datetime 类型
@@ -60,7 +58,8 @@ def show_stock_data_eastmoney(code, df_one, start_date="20200630", end_date="202
        show_nontrading=False,
       #  savefig=dict(fname=fig_name,dpi=100,pad_inches=0.25)
        )
-  
+  # mpf.show()
+
    
 if __name__ == '__main__':
   pickle_path = '/home/yao/workspace/Stock/51_10天系列/01_数据操作/df_0707.pickle' 
@@ -75,7 +74,9 @@ if __name__ == '__main__':
     end_day = end_day.strftime("%Y%m%d")   
 
     show_stock_data_eastmoney(key, val, "20240101", end_day)
-    input()
+    plt.draw()
+    plt.pause(0.5)   # 无pause无法显示图像
+    user_input = input("按任意键继续，输入'q'退出: ")
     plt.close('all')
     
     

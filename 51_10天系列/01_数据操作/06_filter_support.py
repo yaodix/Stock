@@ -88,4 +88,4 @@ if __name__ == "__main__":
       plot_pivot_line(data, pivots)
       plt.savefig('./workdata/'+code + '.jpg')
       # break
-      # plt.show()
+      plt.show()
