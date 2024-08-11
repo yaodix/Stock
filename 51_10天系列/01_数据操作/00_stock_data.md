@@ -22,7 +22,7 @@
 
 查
 
-#### 常用lib
+#### 常用python-lib
 
 * pandas
 * numpy
@@ -63,7 +63,7 @@ https://blog.csdn.net/Shepherdppz/article/details/117575286
 股票筛选
 
 1. 上升趋势，波段清晰
-2. 趋势没有大的改变，如高低价格、涨跌比例、涨跌时间跨度
+2. 趋势没有大的改变，如涨跌比例、涨跌时间跨度
 3. 各波段成交量没有大的变化
 
 #### 买卖点
@@ -74,13 +74,23 @@ https://blog.csdn.net/Shepherdppz/article/details/117575286
 
 ![1722526086009](image/00_stock_data/1722526086009.png)
 
-
 ### 回测
+
+vectorbt进行策略回测
+
+![1723346279759](image/00_stock_data/1723346279759.png)
 
 ### 发布
 
+将筛选的股票分析报表发送至指定邮箱。
+
+![1723296332490](image/00_stock_data/1723296332490.png)
+
 ### 部署
 
-树莓派
+树莓派-linux
 
-笔记本
+* 数据自动更新
+* 策略自动运行和发布
+
+笔记本-windows
