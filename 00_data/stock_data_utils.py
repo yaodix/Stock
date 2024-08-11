@@ -71,3 +71,13 @@ def LoadPickleData(pickle_path):
       df_dict = pickle.load(handle) 
   
   return df_dict
+
+def LoadData(pickle_path):
+  if not os.path.exists(pickle_path):
+    print("no file " + pickle_path)
+    return
+    
+  with open(pickle_path, 'rb') as handle:
+      df_dict = pickle.load(handle) 
+  
+  return df_dict
