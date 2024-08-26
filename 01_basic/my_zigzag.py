@@ -163,6 +163,12 @@ def get_pivots(data, raise_thresh = 0.1, fall_thresh = 0.07):
   return pivots
 
 
+def get_max_decade_ration(data):
+  pass
+
+def get_min_raise_ration(data):
+  pass
+
 # 添加测试用例
 test_data_1 = np.array([1, 1.2, 1, 0.8, 1.5, 1.8, 1.74])
 test_data_2 = np.array([1, 0.8, 1.2, 1, 0.5, 1.5, 1.8, 1.0, 1.03])
