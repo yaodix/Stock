@@ -62,6 +62,9 @@ def filter_raise_pivot_line(src_data, pivots, k_thresh, verbose = False):
   
 # 涨势
 def daily_raise_long_buy(src_data, pivots):
+  '''
+  日k线上看多,
+  '''
   p_list = list(pivots.items())
   # 判断最后一个支点属性
   last_pivot_index, last_pivot_class = p_list[-1]
@@ -71,7 +74,7 @@ def daily_raise_long_buy(src_data, pivots):
     if len(src_data) - last_pivot_index > 4:  # 最后一个支点是低点，但是后续不涨天数不多
       return False
     # 涨幅不超过3%
-    if (src_data[-1] / src_data[last_pivot_index] -1) > 0.025:
+    if (src_data[-1] / src_data[last_pivot_index] -1) > 0.05:
       return False
     # TODO: 涨的时间和幅度来排序
     
@@ -79,8 +82,7 @@ def daily_raise_long_buy(src_data, pivots):
   low_pivots_index = [k for k, v in pivots.items() if v == -1]
   if (len(low_pivots_index) < 3):
     return False
-  if (len(low_pivots_index) < 3):
-    return False
+
   
   high_pivots_index = [k for k, v in pivots.items() if v == 1]
   if (len(high_pivots_index) < 3):
@@ -94,13 +96,37 @@ def daily_raise_long_buy(src_data, pivots):
      src_data[high_pivots_index[-2]] < src_data[high_pivots_index[-3]] :
     return False
 
-  # # 最近半年股票在涨势，且最大回撤不超过30%
-  #   half_year_pre_index = -5*15
-  #   if len(src_data) < 100:
-  #     half_year_pre_index = 0
-  #   if src_data[-1] < src_data[half_year_pre_index]:
-  #     return False
+  # 涨跌幅比例变化不大
+  raise_2 = src_data[high_pivots_index[-1]] - src_data[low_pivots_index[-2]]
+  raise_1 = src_data[high_pivots_index[-2]] - src_data[low_pivots_index[-3]]
+  if abs((raise_2 / raise_1) -1) > 0.25:  # 涨幅变化不大
+    return False
+
+  decade_1 = src_data[high_pivots_index[-1]] - src_data[low_pivots_index[-1]]
+  decade_2 = src_data[high_pivots_index[-2]] - src_data[low_pivots_index[-2]]
+  if abs((decade_1 / decade_2)-1 ) > 0.25:  
+    return False
   
+  # 偏度变化不大
+  raise_2_datas = high_pivots_index[-1] - low_pivots_index[-2]
+  raise_1_datas = high_pivots_index[-2] - low_pivots_index[-3]
+  if abs((raise_2_datas / raise_1_datas) -1) > 0.25:  # 涨幅变化不大
+    return False
+
+  decade_1_datas = low_pivots_index[-2] - high_pivots_index[-2]
+  decade_2_datas = low_pivots_index[-1] - high_pivots_index[-1]
+  if abs((decade_1_datas / decade_2_datas)-1 ) > 0.25:
+    return False
+  
+  # 上升趋势不要有回撤超过5%
+  
+
+
+  # 成交量变化设置TODO
+
+  # 买点判断，pinbar
+
+
   return True
   
 # 水平震荡
@@ -211,7 +237,7 @@ def long_sell(src_data, pivots):
   
 
 if __name__ == "__main__":
-  pickle_path = '/home/yao/workspace/Stock/51_10天系列/01_数据操作/df_0707.pickle' 
+  pickle_path = '/home/yao/workspace/Stock/51_10天系列/01_数据操作/df_0826.pickle' 
   df_dict = LoadPickleData(pickle_path)
   for code, val in tqdm(df_dict.items()):
     # if code < "000400":
@@ -220,10 +246,10 @@ if __name__ == "__main__":
 
     end_day = dt.date(dt.date.today().year,dt.date.today().month,dt.date.today().day)
     end_day = end_day.strftime("%Y%m%d")   
-    start_date_str = '10-01-2023'
+    start_date_str = '01-01-2024'
     start_day = dt.datetime.strptime(start_date_str, '%m-%d-%Y').date()
     # val = ak.stock_zh_a_hist(symbol=code, start_date=start_day, end_date="20240507" ,period = "weekly", adjust= 'qfq')
-    val = ak.stock_zh_a_hist(symbol=code, start_date=start_day, end_date="20241207" ,period = "daily", adjust= 'qfq')
+    # val = ak.stock_zh_a_hist(symbol=code, start_date=start_day, end_date="20241207" ,period = "daily", adjust= 'qfq')
     # print(val.tail())
     
     
@@ -242,7 +268,7 @@ if __name__ == "__main__":
     # pivots = get_pivots(data, weekly_raise_thresh_val, weekly_fail_thresh_val)
     # sel = daily_hor_osc_long_buy(data, pivots)
     # sel = weekly_hor_osc_long_buy(data, pivots)
-    
+    # 进一步筛选
     # sel = True
     #TODO 显示比例修改
     if sel:
