@@ -61,9 +61,10 @@ def filter_raise_pivot_line(src_data, pivots, k_thresh, verbose = False):
   return False
   
 # 涨势
-def daily_raise_long_buy(src_data, pivots):
+def daily_raise_long_buy(src_data, pivots, df_daily):
   '''
   日k线上看多,
+  判断买点
   '''
   p_list = list(pivots.items())
   # 判断最后一个支点属性
@@ -119,7 +120,7 @@ def daily_raise_long_buy(src_data, pivots):
     return False
   
   # 上升趋势不要有回撤超过5%
-  
+
 
 
   # 成交量变化设置TODO
@@ -255,7 +256,8 @@ if __name__ == "__main__":
     
     df_daily = val[val["日期"]> start_day]
     
-    X = df_daily["收盘"]
+    X = df_daily["收盘"][:-35]
+    # print(df_daily[:-35].tail(1))
     data = np.asarray(X)    
     daily_raise_thresh_val = 0.08
     daily_fail_thresh_val = 0.06
@@ -264,7 +266,7 @@ if __name__ == "__main__":
     pivots = get_pivots(data, daily_raise_thresh_val, daily_fail_thresh_val)
     # print(pivots)
     # print(data[list(pivots.keys())])
-    sel = daily_raise_long_buy(data, pivots)
+    sel = daily_raise_long_buy(data, pivots, df_daily)
     # pivots = get_pivots(data, weekly_raise_thresh_val, weekly_fail_thresh_val)
     # sel = daily_hor_osc_long_buy(data, pivots)
     # sel = weekly_hor_osc_long_buy(data, pivots)
