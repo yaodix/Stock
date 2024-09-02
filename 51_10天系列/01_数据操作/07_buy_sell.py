@@ -218,19 +218,33 @@ def weekly_hor_osc_long_buy(src_data, pivots):
   if abs(src_data[high_pivots_index[-1]] - src_data[high_pivots_index[-2]]) / src_data[high_pivots_index[-2]] > 0.08:
     return False
   
-
-  # 涨跌的天数不能差别太大
-  raise1_days = high_pivots_index[-2] - low_pivots_index[-3]
-  raise2_days = high_pivots_index[-1] - low_pivots_index[-2]
-  fail1_days = low_pivots_index[-1] - high_pivots_index[-1]
-  fail2_days = low_pivots_index[-2] - high_pivots_index[-2]
-
-  if abs(raise1_days-fail1_days) > 9 or abs(raise2_days - fail2_days) > 9:
+  # 涨跌幅比例变化不大
+  raise_2 = src_data[high_pivots_index[-1]] - src_data[low_pivots_index[-2]]
+  raise_1 = src_data[high_pivots_index[-2]] - src_data[low_pivots_index[-3]]
+  if abs((raise_2 / raise_1) -1) > 0.25:  # 涨幅变化不大
     return False
+  
+  decade_1 = src_data[high_pivots_index[-1]] - src_data[low_pivots_index[-1]]
+  decade_2 = src_data[high_pivots_index[-2]] - src_data[low_pivots_index[-2]]
+  if abs((decade_1 / decade_2)-1 ) > 0.25:  
+    return False
+
+  # 偏度变化不大
+  raise_2_datas = high_pivots_index[-1] - low_pivots_index[-2]
+  raise_1_datas = high_pivots_index[-2] - low_pivots_index[-3]
+  if abs((raise_2_datas / raise_1_datas) -1) > 0.25:  # 涨幅变化不大
+    return False
+
+  decade_1_datas = low_pivots_index[-2] - high_pivots_index[-2]
+  decade_2_datas = low_pivots_index[-1] - high_pivots_index[-1]
+  if abs((decade_1_datas / decade_2_datas)-1 ) > 0.25:
+    return False
+
 
   # 高低点涨跌要满足一定幅度
   if (src_data[high_pivots_index[-1]] / low_pivot_val[1]) > 0.15:
     return True
+  
 
 
 def long_sell(src_data, pivots):
@@ -238,7 +252,7 @@ def long_sell(src_data, pivots):
   
 
 if __name__ == "__main__":
-  pickle_path = '/home/yao/workspace/Stock/51_10天系列/01_数据操作/df_0826.pickle' 
+  pickle_path = '/home/yao/workspace/Stock/51_10天系列/01_数据操作/dfw_0830.pickle' 
   df_dict = LoadPickleData(pickle_path)
   for code, val in tqdm(df_dict.items()):
     # if code < "000400":
@@ -249,27 +263,28 @@ if __name__ == "__main__":
     end_day = end_day.strftime("%Y%m%d")   
     start_date_str = '01-01-2024'
     start_day = dt.datetime.strptime(start_date_str, '%m-%d-%Y').date()
-    # val = ak.stock_zh_a_hist(symbol=code, start_date=start_day, end_date="20240507" ,period = "weekly", adjust= 'qfq')
     # val = ak.stock_zh_a_hist(symbol=code, start_date=start_day, end_date="20241207" ,period = "daily", adjust= 'qfq')
+    # val = ak.stock_zh_a_hist(symbol=code, start_date=start_day, end_date="20241207", period = "weekly", adjust= 'qfq')
     # print(val.tail())
     
     
     df_daily = val[val["日期"]> start_day]
     
-    X = df_daily["收盘"][:-35]
+    X = df_daily["收盘"]
     # print(df_daily[:-35].tail(1))
     data = np.asarray(X)    
     daily_raise_thresh_val = 0.08
     daily_fail_thresh_val = 0.06
     weekly_raise_thresh_val = 0.15
     weekly_fail_thresh_val = 0.15
-    pivots = get_pivots(data, daily_raise_thresh_val, daily_fail_thresh_val)
+    # pivots = get_pivots(data, daily_raise_thresh_val, daily_fail_thresh_val)
+    pivots = get_pivots(data, weekly_raise_thresh_val, weekly_fail_thresh_val)
     # print(pivots)
     # print(data[list(pivots.keys())])
-    sel = daily_raise_long_buy(data, pivots, df_daily)
+    # sel = daily_raise_long_buy(data, pivots, df_daily)
     # pivots = get_pivots(data, weekly_raise_thresh_val, weekly_fail_thresh_val)
     # sel = daily_hor_osc_long_buy(data, pivots)
-    # sel = weekly_hor_osc_long_buy(data, pivots)
+    sel = weekly_hor_osc_long_buy(data, pivots)
     # 进一步筛选
     # sel = True
     #TODO 显示比例修改
