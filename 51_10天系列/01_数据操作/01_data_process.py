@@ -80,16 +80,16 @@ def dump(security_pool, pickle_file, years = 100):
     start_day = start_day.strftime("%Y%m%d")
     end_day = end_day.strftime("%Y%m%d")   
     
-    df_daily = ak.stock_zh_a_hist(symbol=code, period = "daily", start_date=start_day, end_date= end_day, adjust= 'qfq')
-    # df_weekly = ak.stock_zh_a_hist(symbol=code, period = "weekly", start_date=start_day, end_date= end_day, adjust= 'qfq')
+    # df = ak.stock_zh_a_hist(symbol=code, period = "daily", start_date=start_day, end_date= end_day, adjust= 'qfq')
+    df = ak.stock_zh_a_hist(symbol=code, period = "weekly", start_date=start_day, end_date= end_day, adjust= 'qfq')
     
-    df_dict[code] = df_daily
+    df_dict[code] = df
     
   with open(pickle_file, 'wb') as handle:
     pickle.dump(df_dict, handle, protocol=pickle.HIGHEST_PROTOCOL)
 
 
 if __name__ == '__main__':
-  pickle_path = './df_0826.pickle' 
+  pickle_path = './dfw_0830.pickle' 
   df = GetSecurityCode()  
   dump(df, pickle_path)
