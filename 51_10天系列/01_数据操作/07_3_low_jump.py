@@ -60,11 +60,11 @@ def CheckBreakUp(df_daily, code):
     return False
   
   # 涨停之间，幅度都小
-  arr2 = diff[daily_limit_idx[0]+1:daily_limit_idx[-1]]
-  if np.any(abs(arr2) > raise_ratio_exp):
-    return False
+  # arr2 = diff[daily_limit_idx[0]+1:daily_limit_idx[-1]]
+  # if np.any(abs(arr2) > raise_ratio_exp):
+  #   return False
   
-  # 涨停后有价格低于涨停前一天价格
+  # 涨停后有价格低于涨停前一天价格,
   if np.any(close_price[daily_limit_idx[-1]+1:] < close_price[daily_limit_idx[-1]-1]):
     return False
   
@@ -73,32 +73,34 @@ def CheckBreakUp(df_daily, code):
   if min_in_two_raise_limt >  close_price[-1]:
     return False
   
-  # rr = abs(close_price[daily_limit_idx[-1]] - close_price[-1])/ close_price[daily_limit_idx[-1]]
-  # if abs(close_price[daily_limit_idx[-1]] - close_price[-1])/ close_price[daily_limit_idx[-1]] > raise_ratio_exp:
-  #   return True
+  rr = abs(close_price[daily_limit_idx[-1]] - close_price[-1])/ close_price[daily_limit_idx[-1]]
+  if (close_price[daily_limit_idx[-1]] - close_price[-1])/ close_price[daily_limit_idx[-1]] > raise_ratio_exp*0.8:
+    return True
 
-  return True
+  # return True
 
 
 
 if __name__ == "__main__":
-  pickle_path = '/home/yao/workspace/Stock/51_10天系列/01_数据操作/df_0908.pickle' 
+  pickle_path = '/home/yao/workspace/Stock/51_10天系列/01_数据操作/df_0930.pickle' 
   df_dict = LoadPickleData(pickle_path)
   for code, val in tqdm(df_dict.items()):
-    if code < "000521":
-      continue
+    # if code != "002693":
+      # continue
     # val.drop([len(val)-1],inplace=True)
 
     dt_end_day = dt.date(dt.date.today().year,dt.date.today().month,dt.date.today().day)
     end_day = dt_end_day.strftime("%Y%m%d")   
     start_date_str = '01-01-2024'
     start_day = dt.datetime.strptime(start_date_str, '%m-%d-%Y').date()
-    # val = ak.stock_zh_a_hist(symbol=code, start_date=start_day, end_date="20241207" ,period = "daily", adjust= 'qfq')
+    # val = ak.stock_zh_a_hist(symbol=code, start_date=start_day, end_date="20240826" ,period = "daily", adjust= 'qfq')
     # val = ak.stock_zh_a_hist(symbol=code, start_date=start_day, end_date="20241207", period = "weekly", adjust= 'qfq')
     # print(val.tail(5))
     
-    
-    df_daily = val[val["日期"]> start_day]
+    end_day = dt.datetime.strptime("08-27-2024", '%m-%d-%Y').date()
+    df_daily = val[start_day < val["日期"]]
+    df_daily = df_daily[df_daily["日期"] < end_day]
+    # print(df_daily.tail(5))
     close_price = np.asarray(df_daily["收盘"])
     # print(pivots)
     # print(data[list(pivots.keys())])
@@ -112,7 +114,7 @@ if __name__ == "__main__":
       # if not tobuy:
         # continue
       print(code)
-      plot_start = dt_end_day - dt.timedelta(days=40)
+      plot_start = end_day - dt.timedelta(days=40)
       show_stock_data_eastmoney(code, df_daily,plot_start, end_day)
       # break
       # plt.show()
