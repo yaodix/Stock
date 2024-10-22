@@ -169,6 +169,29 @@ def get_max_decade_ration(data):
 def get_min_raise_ration(data):
   pass
 
+
+def get_daily_raise_limit(close_data, code, thresh = 0.096):
+  '''
+  get daily raise limit idx
+  '''
+  raise_limit = thresh
+  if ("30" in code[0:2]):
+    raise_limit = thresh * 2
+
+  close_price = np.asarray(close_data)
+  diff = np.diff(close_price)
+  diff = diff / close_price[:-1]
+  close_price = close_price[1:]
+
+  daily_limit_idx = []
+  
+  for idx, val in enumerate(diff):
+    if val > raise_limit:
+      daily_limit_idx.append(idx+1)
+
+  daily_limit_idx = np.asarray(daily_limit_idx)
+  
+  return daily_limit_idx
 # 添加测试用例
 test_data_1 = np.array([1, 1.2, 1, 0.8, 1.5, 1.8, 1.74])
 test_data_2 = np.array([1, 0.8, 1.2, 1, 0.5, 1.5, 1.8, 1.0, 1.03])
