@@ -5,12 +5,6 @@
 test: 
 '''
 
-
-#  斜率K + 单调性 + 支点数量 + 长度?
-# find and sort
-
-# filter by slope of pivot
-
 import sys
 sys.path.append(r"/home/yao/workspace/Stock/01_basic")
 sys.path.append(r"/home/yao/workspace/Stock/00_data")
@@ -30,11 +24,63 @@ def count_numbers_in_range(arr, start, end):
     # 统计满足条件的数字个数
     count = np.count_nonzero(mask)
     return count
-def filter_pivot_line_raiselimitinwave(src_data, pivots, security_code, verbose = False):
-  
-  ll = np.array(src_data["收盘"])[-1]
+
+def filter_low_wave(src_data, pivots, security_code, verbose = False):
   raise_limit_idx =  get_daily_raise_limit(src_data["收盘"], security_code)
+  raise_limit = 0.096
+  if ("30" in code[0:2]):
+    raise_limit = 0.198
+
+  low_pivots_index = [k for k, v in pivots.items() if v == -1]
+  high_pivots_index = [k for k, v in pivots.items() if v == 1]
+  if (len(low_pivots_index) < 3):
+    return False
+  if (len(high_pivots_index) < 2):
+    return False
   
+  # 波谷在波峰前面，否则退出
+  if (high_pivots_index[-1] > low_pivots_index[-1]):
+    return False
+  
+  # 涨停数量不少于1个，不多于2个
+  raise_last_start_low_idx = low_pivots_index[-2]
+  raise_last_end_high_idx = high_pivots_index[-1]
+  count1 = count_numbers_in_range(raise_limit_idx, raise_last_start_low_idx, raise_last_end_high_idx)
+  if count1 < 1 or count1 > 2:  
+    return False
+
+  raise_lastsecond_start_low_idx = low_pivots_index[-3]
+  raise_lastsecond_end_high_idx = high_pivots_index[-2]
+  count2 = count_numbers_in_range(raise_limit_idx, raise_lastsecond_start_low_idx, raise_lastsecond_end_high_idx)
+  if count2 < 1 or count2 > 2:
+    return False
+  
+  # 2个低点价格差距不能大
+  if abs(src_data["收盘"][low_pivots_index[-1]] - src_data["收盘"][low_pivots_index[-2]]) / src_data["收盘"][low_pivots_index[-2]] >  0.15:
+    return False
+
+  # 下降数量大于2
+  decade_last_end_low_idx = low_pivots_index[-1]
+  if raise_last_start_low_idx - raise_lastsecond_end_high_idx < 3:
+    return False
+  
+  if decade_last_end_low_idx - raise_last_end_high_idx < 3:
+    return False
+  
+  # 涨幅
+  raise_lastsecond = abs(src_data["收盘"][raise_lastsecond_end_high_idx] - src_data["收盘"][raise_lastsecond_start_low_idx]) / src_data["收盘"][raise_lastsecond_start_low_idx]
+  raise_last = abs(src_data["收盘"][raise_last_end_high_idx] - src_data["收盘"][raise_last_start_low_idx]) / src_data["收盘"][raise_last_start_low_idx]
+  if raise_lastsecond < 1.8 * raise_limit or raise_last < 1.8 * raise_limit:
+    return True
+
+
+  return False
+
+ 
+  
+
+def filter_high_wave(src_data, pivots, security_code, verbose = False):
+  raise_limit_idx =  get_daily_raise_limit(src_data["收盘"], security_code)  
   low_pivots_index = [k for k, v in pivots.items() if v == -1]
   high_pivots_index = [k for k, v in pivots.items() if v == 1]
   if (len(low_pivots_index) < 2):
@@ -64,12 +110,25 @@ def filter_pivot_line_raiselimitinwave(src_data, pivots, security_code, verbose 
 
   return False
   
+'''
+low wave测试集合
+
+
+'''
+high_wave_test = [
+                 
+                 ["603787","20240809", "20241022"],
+                 ]
+low_wave_test = [
+  ["603787","20240207", "20240408"],
+  ["603787","20240207", "20240428"]
+]
 
 if __name__ == "__main__":
   pickle_path = '/home/yao/workspace/Stock/51_10天系列/01_数据操作/df_1022.pickle' 
   df_dict = LoadPickleData(pickle_path)
   for code, val in tqdm(df_dict.items()):
-    # if  "000526" not in code:
+    # if  "603787" not in code:
       # continue
     
     # end_day = dt.date(dt.date.today().year,dt.date.today().month,dt.date.today().day)
@@ -87,14 +146,22 @@ if __name__ == "__main__":
     X = df_daily["收盘"]
     
     data = np.asarray(X)    
-    pivots = get_pivots(data, 0.15, 0.08)
+    # 
+    pivots_high_wave = get_pivots(data, 0.15, 0.08)
+    pivots_low_wave = get_pivots(data, 0.096, 0.05)
+    
     # print(pivots)
     # print(data[list(pivots.keys())])
-    sel =  filter_pivot_line_raiselimitinwave(df_daily, pivots, code)
+    sel1 = False
+    # sel1 =  filter_high_wave(df_daily, pivots_high_wave, code)
+    sel2 =  filter_low_wave(df_daily, pivots_low_wave, code)
     # sel = True
+    # plt.clf()
+    # plot_pivots(data, pivots_low_wave)
+    # plot_pivot_line(data, pivots_low_wave)
+    # plt.show()
     #TODO 显示比例修改
-    if sel:
-      print(code)
-      show_stock_data_eastmoney(code, df_daily,"20240501", end_day)
+    if sel1 or sel2:
+      show_stock_data_eastmoney(code, df_daily,end_day-dt.timedelta(days=100), end_day)
       # break
       # plt.show()

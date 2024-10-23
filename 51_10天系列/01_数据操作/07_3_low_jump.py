@@ -82,7 +82,7 @@ def CheckBreakUp(df_daily, code):
 
 
 if __name__ == "__main__":
-  pickle_path = '/home/yao/workspace/Stock/51_10天系列/01_数据操作/df_0930.pickle' 
+  pickle_path = '/home/yao/workspace/Stock/51_10天系列/01_数据操作/df_1022.pickle' 
   df_dict = LoadPickleData(pickle_path)
   for code, val in tqdm(df_dict.items()):
     # if code != "002693":
@@ -97,7 +97,7 @@ if __name__ == "__main__":
     # val = ak.stock_zh_a_hist(symbol=code, start_date=start_day, end_date="20241207", period = "weekly", adjust= 'qfq')
     # print(val.tail(5))
     
-    end_day = dt.datetime.strptime("08-27-2024", '%m-%d-%Y').date()
+    end_day = dt.datetime.strptime("10-22-2024", '%m-%d-%Y').date()
     df_daily = val[start_day < val["日期"]]
     df_daily = df_daily[df_daily["日期"] < end_day]
     # print(df_daily.tail(5))
