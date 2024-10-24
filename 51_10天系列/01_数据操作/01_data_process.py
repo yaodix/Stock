@@ -90,6 +90,6 @@ def dump(security_pool, pickle_file, years = 100):
 
 
 if __name__ == '__main__':
-  pickle_path = './df_1022.pickle' 
+  pickle_path = './df_1024.pickle' 
   df = GetSecurityCode()  
   dump(df, pickle_path)

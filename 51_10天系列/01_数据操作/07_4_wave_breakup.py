@@ -6,8 +6,8 @@ test:
 '''
 
 import sys
-sys.path.append(r"/home/yao/workspace/Stock/01_basic")
-sys.path.append(r"/home/yao/workspace/Stock/00_data")
+sys.path.append(r"/home/yao/myproject/Stock/01_basic")
+sys.path.append(r"/home/yao/myproject/Stock/00_data")
 
 import akshare as ak
 import numpy as np
@@ -67,47 +67,91 @@ def filter_low_wave(src_data, pivots, security_code, verbose = False):
   if decade_last_end_low_idx - raise_last_end_high_idx < 3:
     return False
   
+    # 增加涨幅比例限制
+  raise_1 = (src_data["收盘"][high_pivots_index[-2]]/src_data["收盘"][low_pivots_index[-3]])
+  raise_2 = (src_data["收盘"][high_pivots_index[-1]]/src_data["收盘"][low_pivots_index[-2]])
+  if max(raise_1, raise_2) / min(raise_2, raise_1)  > 2:
+    return False
+  
+  # 增加跌幅比例限制
+  fail_1 = (src_data["收盘"][high_pivots_index[-2]]/src_data["收盘"][low_pivots_index[-2]])
+  fail_2 = (src_data["收盘"][high_pivots_index[-1]]/src_data["收盘"][low_pivots_index[-1]])
+  if max(fail_1, fail_2) / min(fail_2, fail_1)  > 1.6:
+    return False
+
   # 涨幅
   raise_lastsecond = abs(src_data["收盘"][raise_lastsecond_end_high_idx] - src_data["收盘"][raise_lastsecond_start_low_idx]) / src_data["收盘"][raise_lastsecond_start_low_idx]
   raise_last = abs(src_data["收盘"][raise_last_end_high_idx] - src_data["收盘"][raise_last_start_low_idx]) / src_data["收盘"][raise_last_start_low_idx]
   if raise_lastsecond < 1.8 * raise_limit or raise_last < 1.8 * raise_limit:
     return True
 
-
-  return False
-
- 
+  return False 
   
 
 def filter_high_wave(src_data, pivots, security_code, verbose = False):
   raise_limit_idx =  get_daily_raise_limit(src_data["收盘"], security_code)  
+  raise_limit = 0.096
+  if ("30" in code[0:2]):
+    raise_limit = 0.198
+
   low_pivots_index = [k for k, v in pivots.items() if v == -1]
   high_pivots_index = [k for k, v in pivots.items() if v == 1]
-  if (len(low_pivots_index) < 2):
+  if (len(low_pivots_index) < 3):
     return False
-  
+  if (len(high_pivots_index) < 2):
+    return False
+
+  # 波谷在波峰前面，否则退出
   if (high_pivots_index[-1] > low_pivots_index[-1]):
     return False
   
-  # 涨停数量
-  raise_1_start_low_idx = low_pivots_index[-2]
-  raise_1_end_high_idx = high_pivots_index[-1]
-  count = count_numbers_in_range(raise_limit_idx, raise_1_start_low_idx, raise_1_end_high_idx)
-  if count < 1:  
+  # 涨停数量不少于1个，不多于2个
+  raise_last_start_low_idx = low_pivots_index[-2]
+  raise_last_end_high_idx = high_pivots_index[-1]
+  count1 = count_numbers_in_range(raise_limit_idx, raise_last_start_low_idx, raise_last_end_high_idx)
+  if count1 < 1:  
+    return False
+
+  raise_lastsecond_start_low_idx = low_pivots_index[-3]
+  raise_lastsecond_end_high_idx = high_pivots_index[-2]
+  count2 = count_numbers_in_range(raise_limit_idx, raise_lastsecond_start_low_idx, raise_lastsecond_end_high_idx)
+  if count2 < 1:
     return False
   
   # 收盘价格与前低点价格对比
   last_price = np.asarray(src_data["收盘"])[-1]
   last_lowest_pivot_price = np.asarray(src_data["收盘"])[low_pivots_index[-1]]
-  if last_price > 1.1 * last_lowest_pivot_price :
+  if last_price > 1.05 * last_lowest_pivot_price :
     return False
   
-  # 2个low pivots点价格相差不大, 从高位降落到0.618以下
-  last_high_pivot_price = np.asarray(src_data["收盘"])[high_pivots_index[-1]]
-  pre_lowest_pivot_price = np.asarray(src_data["收盘"])[low_pivots_index[-2]]
-  if       abs(last_lowest_pivot_price - last_high_pivot_price) / abs(last_high_pivot_price-pre_lowest_pivot_price) >= 0.5999:
-    return True
+  # 下降数量大于2
+  decade_last_end_low_idx = low_pivots_index[-1]
+  if raise_last_start_low_idx - raise_lastsecond_end_high_idx < 3:
+    return False
+  
+  if decade_last_end_low_idx - raise_last_end_high_idx < 3:
+    return False
 
+  # 高点更高，低点也更高
+  lasrsecond_lowest_pivot_price = src_data["收盘"][low_pivots_index[-2]]
+  lastthird_lowest_pivot_price = src_data["收盘"][low_pivots_index[-3]]
+  
+  last_high_pivot_price = src_data["收盘"][high_pivots_index[-1]]
+  lastsecond_high_pivot_price = src_data["收盘"][high_pivots_index[-2]]
+
+  if not (last_high_pivot_price > lastsecond_high_pivot_price and \
+     last_lowest_pivot_price > lasrsecond_lowest_pivot_price and \
+     lasrsecond_lowest_pivot_price > lastthird_lowest_pivot_price):
+    return False
+  
+   # 两边时间间隔
+  if 1 < abs(low_pivots_index[-1] - high_pivots_index[-1]) and  abs(low_pivots_index[-1] - high_pivots_index[-1]) < 15 and \
+     1 < abs(low_pivots_index[-2] - high_pivots_index[-1]) and  abs(low_pivots_index[-2] - high_pivots_index[-1]) < 15 and \
+     1 < abs(low_pivots_index[-2] - high_pivots_index[-2]) and  abs(low_pivots_index[-2] - high_pivots_index[-2]) < 15 and \
+     1 < abs(low_pivots_index[-3] - high_pivots_index[-2]) and  abs(low_pivots_index[-3] - high_pivots_index[-2]) < 15:
+
+    return True
+    
   return False
   
 '''
@@ -115,8 +159,7 @@ low wave测试集合
 
 
 '''
-high_wave_test = [
-                 
+high_wave_test = [                 
                  ["603787","20240809", "20241022"],
                  ]
 low_wave_test = [
@@ -124,15 +167,24 @@ low_wave_test = [
   ["603787","20240207", "20240428"]
 ]
 
+
+def test_low_wave():
+  pass
+
+def test_high_wave():
+  pass
+
+
+
 if __name__ == "__main__":
-  pickle_path = '/home/yao/workspace/Stock/51_10天系列/01_数据操作/df_1022.pickle' 
+  pickle_path = '/home/yao/myproject/Stock/51_10天系列/01_数据操作/df_1024.pickle' 
   df_dict = LoadPickleData(pickle_path)
   for code, val in tqdm(df_dict.items()):
     # if  "603787" not in code:
       # continue
     
     # end_day = dt.date(dt.date.today().year,dt.date.today().month,dt.date.today().day)
-    end_day_str = "2024-10-22"
+    end_day_str = "2024-10-24"
     end_day = dt.datetime.strptime(end_day_str, '%Y-%m-%d').date()
 
     start_date_str = '2024-02-10'
@@ -153,15 +205,15 @@ if __name__ == "__main__":
     # print(pivots)
     # print(data[list(pivots.keys())])
     sel1 = False
-    # sel1 =  filter_high_wave(df_daily, pivots_high_wave, code)
-    sel2 =  filter_low_wave(df_daily, pivots_low_wave, code)
-    # sel = True
+    sel1 = filter_high_wave(df_daily, pivots_high_wave, code)
+    sel2 = False
+    # sel2 =  filter_low_wave(df_daily, pivots_low_wave, code)
     # plt.clf()
     # plot_pivots(data, pivots_low_wave)
     # plot_pivot_line(data, pivots_low_wave)
     # plt.show()
     #TODO 显示比例修改
     if sel1 or sel2:
-      show_stock_data_eastmoney(code, df_daily,end_day-dt.timedelta(days=100), end_day)
+      show_stock_data_eastmoney(code, df_daily,end_day-dt.timedelta(days=88), end_day)
       # break
       # plt.show()
