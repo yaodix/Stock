@@ -6,8 +6,8 @@ test:
 '''
 
 import sys
-sys.path.append(r"/home/yao/myproject/Stock/01_basic")
-sys.path.append(r"/home/yao/myproject/Stock/00_data")
+sys.path.append(r"/home/yao/workspace/Stock/01_basic")
+sys.path.append(r"/home/yao/workspace/Stock/00_data")
 
 import akshare as ak
 import numpy as np
@@ -68,14 +68,14 @@ def filter_low_wave(src_data, pivots, security_code, verbose = False):
     return False
   
     # 增加涨幅比例限制
-  raise_1 = (src_data["收盘"][high_pivots_index[-2]]/src_data["收盘"][low_pivots_index[-3]])
-  raise_2 = (src_data["收盘"][high_pivots_index[-1]]/src_data["收盘"][low_pivots_index[-2]])
+  raise_1 = abs(src_data["收盘"][high_pivots_index[-2]]-src_data["收盘"][low_pivots_index[-3]])  /src_data["收盘"][low_pivots_index[-3]]
+  raise_2 = abs(src_data["收盘"][high_pivots_index[-1]]-src_data["收盘"][low_pivots_index[-2]]) / src_data["收盘"][low_pivots_index[-2]]
+  fail_1 = abs(src_data["收盘"][high_pivots_index[-2]]-src_data["收盘"][low_pivots_index[-2]])/src_data["收盘"][low_pivots_index[-2]]
+  fail_2 = abs(src_data["收盘"][high_pivots_index[-1]]-src_data["收盘"][low_pivots_index[-1]])/src_data["收盘"][low_pivots_index[-1]]
   if max(raise_1, raise_2) / min(raise_2, raise_1)  > 2:
     return False
   
   # 增加跌幅比例限制
-  fail_1 = (src_data["收盘"][high_pivots_index[-2]]/src_data["收盘"][low_pivots_index[-2]])
-  fail_2 = (src_data["收盘"][high_pivots_index[-1]]/src_data["收盘"][low_pivots_index[-1]])
   if max(fail_1, fail_2) / min(fail_2, fail_1)  > 1.6:
     return False
 
@@ -177,10 +177,10 @@ def test_high_wave():
 
 
 if __name__ == "__main__":
-  pickle_path = '/home/yao/myproject/Stock/51_10天系列/01_数据操作/df_1024.pickle' 
+  pickle_path = '/home/yao/workspace/Stock/51_10天系列/01_数据操作/df_1024.pickle' 
   df_dict = LoadPickleData(pickle_path)
   for code, val in tqdm(df_dict.items()):
-    # if  "603787" not in code:
+    # if  "000002" not in code:
       # continue
     
     # end_day = dt.date(dt.date.today().year,dt.date.today().month,dt.date.today().day)
@@ -191,6 +191,9 @@ if __name__ == "__main__":
     start_day = dt.datetime.strptime(start_date_str, '%Y-%m-%d').date()
     
     val.set_index('日期', inplace=True)
+    src_daily = val.loc[start_day:]
+    src_daily.reset_index(inplace=True)
+
     df_daily = val.loc[start_day:end_day]
     # print(df_daily.tail())
     df_daily.reset_index(inplace=True)
@@ -205,15 +208,15 @@ if __name__ == "__main__":
     # print(pivots)
     # print(data[list(pivots.keys())])
     sel1 = False
-    sel1 = filter_high_wave(df_daily, pivots_high_wave, code)
+    # sel1 = filter_high_wave(df_daily, pivots_high_wave, code)
     sel2 = False
-    # sel2 =  filter_low_wave(df_daily, pivots_low_wave, code)
+    sel2 =  filter_low_wave(df_daily, pivots_low_wave, code)
     # plt.clf()
     # plot_pivots(data, pivots_low_wave)
     # plot_pivot_line(data, pivots_low_wave)
     # plt.show()
     #TODO 显示比例修改
     if sel1 or sel2:
-      show_stock_data_eastmoney(code, df_daily,end_day-dt.timedelta(days=88), end_day)
+      show_stock_data_eastmoney(code, src_daily,end_day-dt.timedelta(days=88), end_day+dt.timedelta(days=40), vline_data=[end_day_str])
       # break
       # plt.show()

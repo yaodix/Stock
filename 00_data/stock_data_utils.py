@@ -83,24 +83,23 @@ def LoadData(pickle_path):
   
   return df_dict
 
-def show_stock_data_eastmoney(code, df_one, start_date="20200630", end_date="20240530"):
+def show_stock_data_eastmoney(code, df_one, start_date="20200630", end_date="20240530", vline_data = ['2024-08-23']):
   # 将日期列设置为索引，并转换为 datetime 类型
 
   df_one['日期'] = pd.to_datetime(df_one['日期'])
-  df_one.set_index('日期', inplace=True)
-  df_one = df_one.loc[start_date:end_date]
 
   # 调整 DataFrame 列名以符合 mplfinance 的要求
   df_show = df_one.rename(columns={
+    '日期': 'Date',
     '开盘': 'Open',
     '收盘': 'Close',
     '最高': 'High',
     '最低': 'Low',
     '成交量': 'Volume'
   })
+  df_show.set_index('Date', inplace=True)
+  df_show = df_show.loc[start_date:end_date]
 
-  # 转换列名为小写，以符合 mplfinance 的要求
-  df_show.columns = df_show.columns.str.lower()
 
   # 定义 mplfinance 的自定义风格
   mc = mpf.make_marketcolors(up='r', down='g', volume='inherit')
@@ -113,8 +112,10 @@ def show_stock_data_eastmoney(code, df_one, start_date="20200630", end_date="202
        ylabel='Price',
        ylabel_lower='Vol',
        volume=True,
+       vlines=dict(vlines=vline_data,linewidths=(1,)),
       #  mav=(5,20,250),
        show_nontrading=False,
        savefig=dict(fname=fig_name,dpi=100,pad_inches=0.25)
        )
+  
   # mpf.show()

@@ -65,7 +65,7 @@ def GetSecurityCode():
   return df     
 
 # 下载指定所有
-def dump(security_pool, pickle_file, years = 100):
+def dump(security_pool, pickle_file, years = 10):
   pool = []
   if isinstance(security_pool, list):
     pool = security_pool
@@ -73,16 +73,15 @@ def dump(security_pool, pickle_file, years = 100):
     pool = security_pool.code.tolist()
   
   df_dict = {}
-  for code in tqdm(pool):
-    end_day = dt.date(dt.date.today().year,dt.date.today().month,dt.date.today().day)
-    days = years * 365
-    start_day = end_day - dt.timedelta(days)
-    start_day = start_day.strftime("%Y%m%d")
-    end_day = end_day.strftime("%Y%m%d")   
-    
+  days = years * 365
+  end_day = dt.date(dt.date.today().year,dt.date.today().month,dt.date.today().day)
+  start_day = end_day - dt.timedelta(days)
+  end_day = end_day.strftime("%Y%m%d")   
+  start_day = start_day.strftime("%Y%m%d")
+  print(f"start day: {start_day}, end day: {end_day}")
+  for code in tqdm(pool):    
     df = ak.stock_zh_a_hist(symbol=code, period = "daily", start_date=start_day, end_date= end_day, adjust= 'qfq')
-    # df = ak.stock_zh_a_hist(symbol=code, period = "weekly", start_date=start_day, end_date= end_day, adjust= 'qfq')
-    
+    # df = ak.stock_zh_a_hist(symbol=code, period = "weekly", start_date=start_day, end_date= end_day, adjust= 'qfq')    
     df_dict[code] = df
     
   with open(pickle_file, 'wb') as handle:
