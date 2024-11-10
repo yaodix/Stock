@@ -162,3 +162,5 @@ cython_debug/
 51_10天系列/01_数据操作/*.pickle
 51_10天系列/01_数据操作/workdata
 */*/*.pth
+auto_filter/workdata
+auto_filter/sec_data

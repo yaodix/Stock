@@ -18,10 +18,10 @@ def CheckBreakUp(df_daily, code):
   last_idx = 30
 
   raise_limit = 0.096
-  raise_ratio_exp = 0.06
+  raise_ratio_exp = 0.07
   if ("30" in code[0:2]):
     raise_limit = 0.198
-    raise_ratio_exp = 0.08
+    raise_ratio_exp = 0.09
 
   close_price = np.asarray(df_daily["收盘"])[-last_idx-1:]
   diff = np.diff(close_price)
@@ -74,7 +74,7 @@ def CheckBreakUp(df_daily, code):
     return False
   
   rr = abs(close_price[daily_limit_idx[-1]] - close_price[-1])/ close_price[daily_limit_idx[-1]]
-  if (close_price[daily_limit_idx[-1]] - close_price[-1])/ close_price[daily_limit_idx[-1]] > raise_ratio_exp*0.8:
+  if rr > 0.04:
     return True
 
   # return True
@@ -85,19 +85,19 @@ if __name__ == "__main__":
   pickle_path = '/home/yao/workspace/Stock/51_10天系列/01_数据操作/df_1022.pickle' 
   df_dict = LoadPickleData(pickle_path)
   for code, val in tqdm(df_dict.items()):
-    # if code != "002693":
-      # continue
+    if code != "000826":
+      continue
     # val.drop([len(val)-1],inplace=True)
 
     dt_end_day = dt.date(dt.date.today().year,dt.date.today().month,dt.date.today().day)
     end_day = dt_end_day.strftime("%Y%m%d")   
     start_date_str = '01-01-2024'
     start_day = dt.datetime.strptime(start_date_str, '%m-%d-%Y').date()
-    # val = ak.stock_zh_a_hist(symbol=code, start_date=start_day, end_date="20240826" ,period = "daily", adjust= 'qfq')
+    val = ak.stock_zh_a_hist(symbol=code, start_date=start_day, end_date="20241105" ,period = "daily", adjust= 'qfq')
     # val = ak.stock_zh_a_hist(symbol=code, start_date=start_day, end_date="20241207", period = "weekly", adjust= 'qfq')
     # print(val.tail(5))
     
-    end_day = dt.datetime.strptime("10-22-2024", '%m-%d-%Y').date()
+    end_day = dt.datetime.strptime("11-05-2024", '%m-%d-%Y').date()
     df_daily = val[start_day < val["日期"]]
     df_daily = df_daily[df_daily["日期"] < end_day]
     # print(df_daily.tail(5))
