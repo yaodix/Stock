@@ -150,18 +150,40 @@ def filter_high_wave(src_data, pivots, security_code, verbose = False):
     
   return False
   
+def waveTechFilter(df_dict):
+    
+  wave_low_dict = {}
+  wave_high_dict = {}
+  for code, df_daily in tqdm(df_dict.items()):  
+    close = df_daily["收盘"]    
+    close = np.asarray(close)    
 
-  '''
-low wave测试集合
+    pivots_high_wave = tech_base.get_pivots(close, 0.15, 0.08)
+    pivots_low_wave = tech_base.get_pivots(close, 0.096, 0.05)
+    
+    sel1 = filter_high_wave(df_daily, pivots_high_wave, code)
+    sel2 = filter_low_wave(df_daily, pivots_low_wave, code)
+    # plot_pivots(data, pivots_low_wave)
+    # plot_pivot_line(data, pivots_low_wave)
+
+    if sel1:
+      wave_high_dict[code] = pivots_high_wave
+    if sel2:
+      wave_low_dict[code] = pivots_low_wave
+  return wave_low_dict, wave_high_dict
 
 
 '''
+low wave测试集合
+'''
 high_wave_test = [                 
-                 ["603787","20240809", "20241022"],
+                 ["603787", "20241022"],
                  ]
+
 low_wave_test = [
-  ["603787","20240207", "20240408"],
-  ["603787","20240207", "20240428"]
+  ["000826", "20241104"],
+  ["603787", "20240408"],
+  ["603787", "20240428"],
 ]
 
 
@@ -176,45 +198,14 @@ def test_high_wave():
 if __name__ == "__main__":
   pickle_path = '/home/yao/workspace/Stock/auto_filter/sec_data/daily.pickle' 
   df_dict = data_utils.LoadPickleData(pickle_path)
-  for code, val in tqdm(df_dict.items()):
-    # if  "000002" not in code:
-      # continue
-    
-    end_day = dt.date(dt.date.today().year,dt.date.today().month,dt.date.today().day)
-    # end_day_str = "2024-10-24"
-    # end_day = dt.datetime.strptime(end_day_str, '%Y-%m-%d').date()
+  test_dict = {}
+  for ite in low_wave_test:
+    test_dict[ite[0]] = df_dict[ite[0]]
+    end_day = dt.datetime.date(dt.datetime.strptime(ite[1], "%Y%m%d"))
+    test_dict[ite[0]] = test_dict[ite[0]][test_dict[ite[0]]["日期"] <= end_day]
 
-    start_date_str = '2024-02-10'
-    start_day = dt.datetime.strptime(start_date_str, '%Y-%m-%d').date()
-    
-    val.set_index('日期', inplace=True)
-    src_daily = val.loc[start_day:]
-    src_daily.reset_index(inplace=True)
+  wave_low_dict, wave_high_dict = waveTechFilter(test_dict)
 
-    df_daily = val.loc[start_day:end_day]
-    # print(df_daily.tail())
-    df_daily.reset_index(inplace=True)
-    
-    X = df_daily["收盘"]
-    
-    data = np.asarray(X)    
-    # 
+  print(f"wave_low_dict {wave_low_dict.keys()}")
+  # print(f"wave_high_dict {wave_high_dict.keys()}")
 
-    pivots_high_wave = tech_base.get_pivots(data, 0.15, 0.08)
-    pivots_low_wave = tech_base.get_pivots(data, 0.096, 0.05)
-    
-    # print(pivots)
-    # print(data[list(pivots.keys())])
-    sel1 = False
-    sel1 = filter_high_wave(df_daily, pivots_high_wave, code)
-    sel2 = False
-    # sel2 =  filter_low_wave(df_daily, pivots_low_wave, code)
-    # plt.clf()
-    # plot_pivots(data, pivots_low_wave)
-    # plot_pivot_line(data, pivots_low_wave)
-    # plt.show()
-    #TODO 显示比例修改
-    if sel1 or sel2:
-      data_utils.show_stock_data_eastmoney(code, src_daily,end_day-dt.timedelta(days=88), end_day+dt.timedelta(days=40), vline_data=[])
-      # break
-      # plt.show()

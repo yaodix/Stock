@@ -124,7 +124,7 @@ def show_stock_data_eastmoney(code, df_one, start_date="", end_date="", vline_da
   '''
 
   if start_date == "":
-    start_date = dt.date.today() - dt.timedelta(days=50)
+    start_date = dt.date.today() - dt.timedelta(days=100)
     start_date = start_date.strftime("%Y%m%d")
 
   if end_date == "":
@@ -149,7 +149,7 @@ def show_stock_data_eastmoney(code, df_one, start_date="", end_date="", vline_da
   s = mpf.make_mpf_style(base_mpf_style='charles', marketcolors=mc) # 
 
   # 使用 mplfinance 绘制 K 线图，并应用自定义风格
-  fig_name = "./workdata/" + code+".png"
+  fig_name = "/home/yao/workspace/Stock/auto_filter/workdata/" + code+".png"
   mpf.plot(df_show, type='candle', style=s,
        title=f"{code} K linechart",
        ylabel='Price',
@@ -171,6 +171,7 @@ def updateToLatestDay(pickle_file, period_unit):
   first_df = next(iter(df_dict.values()))
   last_date = first_df['日期'].iloc[-1]
   last_date = last_date + dt.timedelta(days=1)
+  # last_date = last_date
   cur_data = dt.date.today()
   last_date_str = last_date.strftime("%Y%m%d")
   cur_data_str = cur_data.strftime("%Y%m%d")   
@@ -196,7 +197,7 @@ if __name__ == '__main__':
   monthly_path = './sec_data/monthly.pickle' 
   weekly_path = './sec_data/weekly.pickle'
   daily_path = './sec_data/daily.pickle'
-  # df = GetSecurityCode()  
-  # dump(df, daily_path,'daily', 10)
+  df = GetSecurityCode()  
+  dump(df, daily_path,'daily', 1)
   # dump(df, weekly_path,'weekly', 50)
   # dump(df, monthly_path,'monthly', 50)

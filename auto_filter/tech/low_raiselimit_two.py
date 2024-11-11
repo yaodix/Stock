@@ -13,7 +13,7 @@ sys.path.append(pro_path)
 import tech.tech_base as tech_base
 import data_utils
 
-def raiseLimitTwoImpl(df_daily, code):
+def raiseLimitTwoImpl(df_daily, code, idx_reverse):
   '''
    two raiselimit and decade recently, but price not raise too much
   '''
@@ -67,19 +67,21 @@ def raiseLimitTwoImpl(df_daily, code):
   # 涨停后到最新价格跌幅大小
   rr = (close_price[daily_limit_idx[-1]] - close_price[-1])/ close_price[daily_limit_idx[-1]]
   if rr > 0.04:
+    # idx_reverse = idx_r
     return True
 
   return False
 
 def raiseLimitTwo(df_dict):
-  select_list = []
+  select_dic= {}
   print("task raise limit two")
   for code, df_daily in tqdm(df_dict.items()):
-    sel = raiseLimitTwoImpl(df_daily, code)
+    idx_re = []
+    sel = raiseLimitTwoImpl(df_daily, code, idx_re)
     if sel:
-      select_list.append(code)
-  print(f"select_list size {select_list.__len__()}")
-  return select_list
+      select_dic[code] = idx_re
+  print(f"select_dic size {select_dic.__len__()}")
+  return select_dic
 
 
 test_list = [["000826", "20241101"]]
@@ -93,5 +95,5 @@ if __name__ == "__main__":
     end_day = dt.datetime.date(dt.datetime.strptime(ite[1], "%Y%m%d"))
     test_dict[ite[0]] = test_dict[ite[0]][test_dict[ite[0]]["日期"] <= end_day]
     
-  res_list = raiseLimitTwo(test_dict)
-  print(res_list)
+  res_dict = raiseLimitTwo(test_dict)
+  print(res_dict)
