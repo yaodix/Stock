@@ -27,20 +27,22 @@ monthly_pickle_path = "./sec_data/monthly.pickle"
 
 def dailyTechFilterAndPost():
   df_dict = data_utils.updateToLatestDay(daily_pickle_path, "daily")
-  res_dict = raiseLimitTwo(df_dict)
-  print(f"res {res_dict.keys()}")
+  code_dict = raiseLimitTwo(df_dict)
+  print(f"res {code_dict.keys()}")
 
 
   # save pic
+  raise_fail_cont = ["底部涨停回调",]
   print(f"save pic")
-  for code, data_idx in tqdm(res_dict.items()):
+  for code, data_idx in tqdm(code_dict.items()):
     data_utils.show_stock_data_eastmoney(code, df_dict[code])
+    fig_name = "/home/yao/workspace/Stock/auto_filter/workdata/" + code+".png"
 
-    contents = ['This is the body, and here is just text http://somedomain/image.png',
-            'You can find an audio file attached.', '/local/path/song.mp3']
+    # raise_fail_cont.append(df_dict[""])
+    raise_fail_cont.append(yagmail.inline(fig_name))
 
   # post to mail
-  yag.send(mail_send_list, 'subject', contents)
+  yag.send(mail_send_list, 'subject', raise_fail_cont)
 
   return
 
