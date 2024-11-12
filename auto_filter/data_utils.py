@@ -118,7 +118,7 @@ def isTradeDay(trade_date=''):
   else:
     return True
 
-def show_stock_data_eastmoney(code, df_one, start_date="", end_date="", vline_data = []):
+def show_stock_data_eastmoney(code, df_one, start_date="", end_date="", vline_data = [], save_dir = '', days = 100, predix = ''):
   '''
     vline_data:['2024-08-23']
   '''
@@ -149,9 +149,9 @@ def show_stock_data_eastmoney(code, df_one, start_date="", end_date="", vline_da
   s = mpf.make_mpf_style(base_mpf_style='charles', marketcolors=mc) # 
 
   # 使用 mplfinance 绘制 K 线图，并应用自定义风格
-  fig_name = "/home/yao/workspace/Stock/auto_filter/workdata/" + code+".png"
+  fig_name = save_dir + predix+ code+".png"
   mpf.plot(df_show, type='candle', style=s,
-       title=f"{code} K linechart",
+       title=f"{predix} {code} K linechart",
        ylabel='Price',
        ylabel_lower='Vol',
        volume=True,
@@ -183,6 +183,8 @@ def updateToLatestDay(pickle_file, period_unit):
     print(f"update data to today, last day {last_date}")  
     for code, df in tqdm(df_dict.items()):
       add_df = ak.stock_zh_a_hist(symbol=code, period = period_unit, start_date=last_date_str, end_date= cur_data_str, adjust= 'qfq')
+      if df['日期'].iloc[-1]== add_df['日期'].iloc[0]:
+         df.drop(df.index[-1], inplace=True)
       df = df.append(add_df, ignore_index=True)
       df_dict[code] = df
       # break

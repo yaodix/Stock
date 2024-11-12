@@ -151,7 +151,9 @@ def filter_high_wave(src_data, pivots, security_code, verbose = False):
   return False
   
 def waveTechFilter(df_dict):
-    
+  '''
+  ret: code_pivot dict
+  '''
   wave_low_dict = {}
   wave_high_dict = {}
   for code, df_daily in tqdm(df_dict.items()):  

@@ -56,8 +56,8 @@ def raiseLimitTwoImpl(df_daily, code, idx_reverse):
     return False
   
   # 涨停后有价格低于涨停前一天价格,
-  if np.any(close_price[daily_limit_idx[-1]+1:] < close_price[daily_limit_idx[-1]-1]):
-    return False
+  # if np.any(close_price[daily_limit_idx[-1]+1:] < close_price[daily_limit_idx[-1]-1]):
+  #   return False
   
   # 涨停后到最新价格跌幅大小
   min_in_two_raise_limt = np.min(close_price[daily_limit_idx[0]:daily_limit_idx[-1]])
@@ -66,7 +66,10 @@ def raiseLimitTwoImpl(df_daily, code, idx_reverse):
   
   # 涨停后到最新价格跌幅大小
   rr = (close_price[daily_limit_idx[-1]] - close_price[-1])/ close_price[daily_limit_idx[-1]]
-  if rr > 0.04:
+  # 两次跌幅的比例相差不大
+  fail_1 = (close_price[daily_limit_idx[0]] - close_price[daily_limit_idx[1]-1])/ close_price[daily_limit_idx[0]]
+  fail_2 = (close_price[daily_limit_idx[1]] - close_price[-1])/ close_price[daily_limit_idx[1]]
+  if rr > 0.04 or abs(fail_1 - fail_2) < 0.02:
     # idx_reverse = idx_r
     return True
 
@@ -80,11 +83,14 @@ def raiseLimitTwo(df_dict):
     sel = raiseLimitTwoImpl(df_daily, code, idx_re)
     if sel:
       select_dic[code] = idx_re
-  print(f"select_dic size {select_dic.__len__()}")
   return select_dic
 
 
-test_list = [["000826", "20241101"]]
+test_list = [
+             ["000826", "20241101"],
+             ["600839", "20240829"],  # sichuanchanghong
+             
+             ]
 
 if __name__ == "__main__":
   df_dict = data_utils.LoadPickleData(pro_path+"/sec_data/daily.pickle")

@@ -14,7 +14,9 @@ import matplotlib.pyplot as plt
 
 import data_utils
 from tech.low_raiselimit_two import raiseLimitTwo
-from tech.wave_raise import filter_low_wave, filter_high_wave
+from tech.wave_raise import waveTechFilter
+import warnings
+warnings.filterwarnings("ignore")
 
 yag = yagmail.SMTP( user="dapaier1115@163.com", password="AXCKERNKNVWSNLVJ", host='smtp.163.com')
 mail_send_list = ["liuyao199111@163.com"]
@@ -28,21 +30,39 @@ monthly_pickle_path = "./sec_data/monthly.pickle"
 def dailyTechFilterAndPost():
   df_dict = data_utils.updateToLatestDay(daily_pickle_path, "daily")
   code_dict = raiseLimitTwo(df_dict)
-  print(f"res {code_dict.keys()}")
+  print(f"raiseLimitTwo size {code_dict.__len__()} {code_dict.keys()}")
 
+  wave_low_dcit, wave_high_dict = waveTechFilter(df_dict)
+  print(f"wave_low_dcit size {wave_low_dcit.__len__()} {wave_low_dcit.keys()}")
+  print(f"wave_high_dict {wave_high_dict.__len__()} {wave_high_dict.keys()}")
 
   # save pic
-  raise_fail_cont = ["底部涨停回调",]
+  mail_cont = ["底部涨停回调",]
   print(f"save pic")
+  save_dir = "/home/yao/workspace/Stock/auto_filter/workdata/"
+  for file in os.listdir(save_dir):
+    if file.endswith('.png'):
+      os.remove(save_dir+file)
+
   for code, data_idx in tqdm(code_dict.items()):
-    data_utils.show_stock_data_eastmoney(code, df_dict[code])
-    fig_name = "/home/yao/workspace/Stock/auto_filter/workdata/" + code+".png"
+    data_utils.show_stock_data_eastmoney(code, df_dict[code], save_dir= save_dir, predix="tr_")
+    fig_name = save_dir+"tr_" + code+".png"
+    mail_cont.append(yagmail.inline(fig_name))
 
-    # raise_fail_cont.append(df_dict[""])
-    raise_fail_cont.append(yagmail.inline(fig_name))
+  mail_cont.append("波动-小波回调")
+  for code, pivots in tqdm(wave_low_dcit.items()):
+    data_utils.show_stock_data_eastmoney(code, df_dict[code], save_dir= save_dir, predix="wl_")
+    fig_name = save_dir +"wl_"+ code+".png"
+    mail_cont.append(yagmail.inline(fig_name))
 
+  mail_cont.append("波动-大波回调")
+  for code, pivots in tqdm(wave_high_dict.items()):
+    data_utils.show_stock_data_eastmoney(code, df_dict[code], save_dir= save_dir, predix="wh_")
+    fig_name = save_dir + "wh_" + code+".png"
+    mail_cont.append(yagmail.inline(fig_name))
+  
   # post to mail
-  yag.send(mail_send_list, 'subject', raise_fail_cont)
+  yag.send(mail_send_list, 'subject', mail_cont)
 
   return
 
