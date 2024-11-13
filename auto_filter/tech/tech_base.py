@@ -1,6 +1,5 @@
 
 # python 3.8+
-from scipy import interpolate
 import akshare as ak
 import numpy as np
 import pandas as pd
@@ -9,51 +8,6 @@ import math
 import matplotlib.pyplot as plt
 
 # 添加数值、百分比
-def plot_pivots(X, pivots):
-    plt.xlim(0, len(X))
-    plt.ylim(X.min()*0.99, X.max()*1.01)
-    plt.plot(np.arange(len(X)), X, 'k:', alpha=0.5)
-    high_idx =[]
-    low_idx =[]
-    for key in  pivots.keys():
-      if pivots[key] == 1:
-        high_idx.append(key)
-      else:
-        low_idx.append(key)
-    sorted(low_idx)
-    sorted(high_idx)
-      
-    plt.scatter(high_idx, X[high_idx], color='r')
-    plt.scatter(low_idx, X[low_idx], color='g')
-    
-    
-def plot_pivot_line(X, pivots, enable_support = True, enable_resistance = True):
-      ### fit low pivots
-    # keep only -1 values
-    if enable_support:
-      low_pivots_index = [k for k, v in pivots.items() if v == -1]
-      y = X[low_pivots_index]
-      x = low_pivots_index
-
-      data_cnt = len(X)
-      data_range = range(0, data_cnt) 
-      akima_interpolator = interpolate.Akima1DInterpolator(x, y)
-      x_fit = np.linspace(min(data_range), max(data_range), data_cnt*2)
-      y_fit = akima_interpolator(x_fit)
-      plt.plot(x_fit, y_fit,'b')
-    if enable_resistance:
-      low_pivots_index = [k for k, v in pivots.items() if v == 1]
-      y = X[low_pivots_index]
-      x = low_pivots_index
-
-      data_cnt = len(X)
-      data_range = range(0, data_cnt) 
-      akima_interpolator = interpolate.Akima1DInterpolator(x, y)
-      x_fit = np.linspace(min(data_range), max(data_range), data_cnt*2)
-      y_fit = akima_interpolator(x_fit)
-      plt.plot(x_fit, y_fit,'r')
-
-  
   
 def get_pivots(data, raise_thresh = 0.1, fall_thresh = 0.07):
   '''
@@ -65,10 +19,11 @@ def get_pivots(data, raise_thresh = 0.1, fall_thresh = 0.07):
   first_trend_finded = False
   to_find_up_trend = False
   to_find_down_trend = False
-  range_data = np.asarray(data)
-  diff = np.diff(range_data)
+  close_price = np.asarray(data)
+  diff = np.diff(close_price)
+  diff = diff / close_price[:-1]
   diff = np.insert(diff, 0, 0)
-  diff = diff / range_data
+
   sum_res_n = np.zeros_like(diff) # 用于找最大负值
   sum_res_p = np.zeros_like(diff) # 用于找最大正值
   max_range = 0  

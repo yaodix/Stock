@@ -15,6 +15,9 @@ import tech.tech_base as tech_base
 import data_utils
 
 def count_numbers_in_range(arr, start, end):
+    '''
+    count nonzero numbers in range
+    '''
     # 使用条件索引来选择在指定区间内的数字
     mask = (arr >= start) & (arr <= end)
     # 统计满足条件的数字个数
@@ -55,12 +58,12 @@ def filter_low_wave(src_data, pivots, security_code, verbose = False):
   if abs(src_data["Close"][low_pivots_index[-1]] - src_data["Close"][low_pivots_index[-2]]) / src_data["Close"][low_pivots_index[-2]] >  0.15:
     return False
 
-  # 下降数量大于2
+  # 下降数量大于等于2
   decade_last_end_low_idx = low_pivots_index[-1]
-  if raise_last_start_low_idx - raise_lastsecond_end_high_idx < 3:
+  if raise_last_start_low_idx - raise_lastsecond_end_high_idx < 2:
     return False
   
-  if decade_last_end_low_idx - raise_last_end_high_idx < 3:
+  if decade_last_end_low_idx - raise_last_end_high_idx < 1:
     return False
   
     # 增加涨幅比例限制
@@ -68,11 +71,11 @@ def filter_low_wave(src_data, pivots, security_code, verbose = False):
   raise_2 = abs(src_data["Close"][high_pivots_index[-1]]-src_data["Close"][low_pivots_index[-2]]) / src_data["Close"][low_pivots_index[-2]]
   fail_1 = abs(src_data["Close"][high_pivots_index[-2]]-src_data["Close"][low_pivots_index[-2]])/src_data["Close"][low_pivots_index[-2]]
   fail_2 = abs(src_data["Close"][high_pivots_index[-1]]-src_data["Close"][low_pivots_index[-1]])/src_data["Close"][low_pivots_index[-1]]
-  if max(raise_1, raise_2) / min(raise_2, raise_1)  > 2:
+  if  (max(raise_1, raise_2) - min(raise_2, raise_1)) > 0.3 :
     return False
   
   # 增加跌幅比例限制
-  if max(fail_1, fail_2) / min(fail_2, fail_1)  > 1.6:
+  if  (max(fail_1, fail_2) - min(fail_2, fail_1)) > 0.3:
     return False
 
   # 涨幅
@@ -105,13 +108,13 @@ def filter_high_wave(src_data, pivots, security_code, verbose = False):
   raise_last_start_low_idx = low_pivots_index[-2]
   raise_last_end_high_idx = high_pivots_index[-1]
   count1 = count_numbers_in_range(raise_limit_idx, raise_last_start_low_idx, raise_last_end_high_idx)
-  if count1 < 1:  
+  if count1 < 1 or count1 > 4:  
     return False
 
   raise_lastsecond_start_low_idx = low_pivots_index[-3]
   raise_lastsecond_end_high_idx = high_pivots_index[-2]
   count2 = count_numbers_in_range(raise_limit_idx, raise_lastsecond_start_low_idx, raise_lastsecond_end_high_idx)
-  if count2 < 1:
+  if count2 < 1 or count2 > 4:
     return False
   
   # close价格与前低点价格对比
@@ -162,11 +165,11 @@ def waveTechFilter(df_dict):
 
     pivots_high_wave = tech_base.get_pivots(close, 0.15, 0.08)
     pivots_low_wave = tech_base.get_pivots(close, 0.096, 0.05)
+    # data_utils.plot_pivots(df_daily["Close"], pivots_low_wave)
     
     sel1 = filter_high_wave(df_daily, pivots_high_wave, code)
     sel2 = filter_low_wave(df_daily, pivots_low_wave, code)
-    # plot_pivots(data, pivots_low_wave)
-    # plot_pivot_line(data, pivots_low_wave)
+    # data_utils.plot_pivot_line(df_daily["Close"], pivots_low_wave)
 
     if sel1:
       wave_high_dict[code] = pivots_high_wave
@@ -184,10 +187,14 @@ high_wave_test = [
 
 low_wave_test = [
   ["000826", "20241104"],
-  ["603787", "20240408"],
+  # ["603787", "20240408"],
   ["603787", "20240428"],
+  ["603196", "20240829"],  # 
 ]
 
+test_tmp = [
+  ["600769", "20241114"]
+]
 
 def test_low_wave():
   pass

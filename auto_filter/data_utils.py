@@ -7,6 +7,7 @@ from  tqdm import tqdm
 import os
 import pickle
 import mplfinance as mpf
+from scipy import interpolate
 
 import matplotlib.pyplot as plt
 
@@ -110,8 +111,8 @@ def LoadPickleData(pickle_path, verbose = False):
     
   with open(pickle_path, 'rb') as handle:
       df_dict = pickle.load(handle) 
-  if verbose:
-    print(f" {pickle_path}\n {df_dict}")
+  # if verbose:
+    # print(f" {pickle_path}\n {df_dict}")
   
   return df_dict
 
@@ -127,6 +128,52 @@ def isTradeDay(trade_date=''):
   else:
     return True
 
+
+def plot_pivots(X, pivots):
+    plt.xlim(0, len(X))
+    plt.ylim(X.min()*0.99, X.max()*1.01)
+    plt.plot(np.arange(len(X)), X, 'k:', alpha=0.5)
+    high_idx =[]
+    low_idx =[]
+    for key in  pivots.keys():
+      if pivots[key] == 1:
+        high_idx.append(key)
+      else:
+        low_idx.append(key)
+    sorted(low_idx)
+    sorted(high_idx)
+      
+    plt.scatter(high_idx, X[high_idx], color='r')
+    plt.scatter(low_idx, X[low_idx], color='g')
+    
+    
+def plot_pivot_line(X, pivots, enable_support = True, enable_resistance = True):
+      ### fit low pivots
+    # keep only -1 values
+    if enable_support:
+      low_pivots_index = [k for k, v in pivots.items() if v == -1]
+      y = X[low_pivots_index]
+      x = low_pivots_index
+
+      data_cnt = len(X)
+      data_range = range(0, data_cnt) 
+      akima_interpolator = interpolate.Akima1DInterpolator(x, y)
+      x_fit = np.linspace(min(data_range), max(data_range), data_cnt*2)
+      y_fit = akima_interpolator(x_fit)
+      plt.plot(x_fit, y_fit,'b')
+    if enable_resistance:
+      low_pivots_index = [k for k, v in pivots.items() if v == 1]
+      y = X[low_pivots_index]
+      x = low_pivots_index
+
+      data_cnt = len(X)
+      data_range = range(0, data_cnt) 
+      akima_interpolator = interpolate.Akima1DInterpolator(x, y)
+      x_fit = np.linspace(min(data_range), max(data_range), data_cnt*2)
+      y_fit = akima_interpolator(x_fit)
+      plt.plot(x_fit, y_fit,'r')
+
+  
 def show_stock_data_eastmoney(code, df_one, start_date="", end_date="", vline_data = [], save_dir = '', days = 100, predix = ''):
   '''
     vline_data:['2024-xx-xx']
@@ -139,10 +186,11 @@ def show_stock_data_eastmoney(code, df_one, start_date="", end_date="", vline_da
   if end_date == "":
     end_date = dt.date.today().strftime("%Y%m%d")
   # 将Data列设置为索引，并转换为 datetime 类型
+  df_one.reset_index(inplace=True)
   df_one['Date'] = pd.to_datetime(df_one['Date'])
 
-  df_show.set_index('Date', inplace=True)
-  df_show = df_show.loc[start_date:end_date]
+  df_one.set_index('Date', inplace=True)
+  df_show = df_one.loc[start_date:end_date]
 
   # 定义 mplfinance 的自定义风格
   mc = mpf.make_marketcolors(up='r', down='g', volume='inherit')

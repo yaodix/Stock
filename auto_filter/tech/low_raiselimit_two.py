@@ -89,6 +89,7 @@ def raiseLimitTwo(df_dict):
 test_list = [
              ["000826", "20241101"],
              ["600839", "20240829"],  # sichuanchanghong
+  ["603787", "20240408"],
              
              ]
 

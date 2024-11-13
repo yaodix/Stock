@@ -29,7 +29,7 @@ monthly_pickle_path = "./sec_data/monthly.pickle"
 
 
 def dailyTechFilterAndPost():
-  df_dict = data_utils.updateToLatestDay(daily_pickle_path, "daily")
+  df_dict = data_utils.updateToLatestDay(daily_pickle_path, "daily", 1)
   code_dict = raiseLimitTwo(df_dict)
   print(f"raiseLimitTwo size {code_dict.__len__()} {code_dict.keys()}")
 
@@ -63,7 +63,7 @@ def dailyTechFilterAndPost():
     mail_cont.append(yagmail.inline(fig_name))
   
   # post to mail
-  yag.send(mail_send_list, 'subject', mail_cont)
+  # yag.send(mail_send_list, 'subject', mail_cont)
 
   return
 
