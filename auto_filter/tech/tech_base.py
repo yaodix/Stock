@@ -86,7 +86,7 @@ def get_pivots(data, raise_thresh = 0.1, fall_thresh = 0.07):
       min_range = min(min_range, sum_res_n[idx])
       # print(idx)
       if max_range >= raise_thresh:
-        # 往回找到涨幅起点
+        # 往回找到amp起点
         for back_idx in range(idx, -1, -1):
           back_sum = back_sum + diff[back_idx]
           if abs(back_sum - max_range) < 1e-6:
@@ -110,13 +110,13 @@ def get_pivots(data, raise_thresh = 0.1, fall_thresh = 0.07):
             max_range =0
             last_trend = -1
             break
-    # 找下一个涨幅
+    # 找下一个amp
     if first_trend_finded and to_find_up_trend:
       sum_res_p[idx] = max(diff[idx], sum_res_p[idx-1]+diff[idx])
       max_range = max(max_range, sum_res_p[idx])
       
       if max_range >= raise_thresh:
-        # 往回找到涨幅起点
+        # 往回找到amp起点
         back_sum = 0        
         for back_idx in range(idx, -1, -1):
           back_sum = back_sum+ diff[back_idx]
@@ -149,7 +149,7 @@ def get_pivots(data, raise_thresh = 0.1, fall_thresh = 0.07):
   if len(pivots) < 1:
     return pivots
      
-  if last_trend == 1: # 最后一波是涨幅，
+  if last_trend == 1: # 最后一波是amp，
     start_key = sorted(pivots.keys())[-1]
     last_idx = np.argmax(data[start_key:])
     pivots[start_key+last_idx] = 1
@@ -173,9 +173,9 @@ def get_daily_raise_limit(close_data, code, thresh = 0.096):
   '''
   get daily raise limit idx
   ret:
-    daily_limit_idx: 涨幅的索引
-    daily_limit_idx_revserse: 涨幅的索引，相对于最后一天的偏移
-    diff: 涨幅, first is zero
+    daily_limit_idx: amp的索引
+    daily_limit_idx_revserse: amp的索引, 相对于最后一天的偏移
+    diff: amp, first is zero
   '''
   raise_limit = thresh
   if ("30" in code[0:2]):
@@ -207,7 +207,7 @@ if __name__ == "__main__":
   df_daily = ak.stock_zh_a_hist(symbol="002182", period = "daily", start_date= "20230102", end_date="20241215")
   # print(df_daily.tail())
   
-  X = df_daily["收盘"]
+  X = df_daily["Close"]
 
   data = np.asarray(X)    
   # data = test_data_1

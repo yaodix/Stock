@@ -22,7 +22,7 @@ def count_numbers_in_range(arr, start, end):
     return count
 
 def filter_low_wave(src_data, pivots, security_code, verbose = False):
-  raise_limit_idx, idx_r, ratio =  tech_base.get_daily_raise_limit(src_data["收盘"], security_code)
+  raise_limit_idx, idx_r, ratio =  tech_base.get_daily_raise_limit(src_data["Close"], security_code)
   raise_limit = 0.096 
   if ("30" in security_code[0:2]):
     raise_limit = 0.198
@@ -52,7 +52,7 @@ def filter_low_wave(src_data, pivots, security_code, verbose = False):
     return False
   
   # 2个低点价格差距不能大
-  if abs(src_data["收盘"][low_pivots_index[-1]] - src_data["收盘"][low_pivots_index[-2]]) / src_data["收盘"][low_pivots_index[-2]] >  0.15:
+  if abs(src_data["Close"][low_pivots_index[-1]] - src_data["Close"][low_pivots_index[-2]]) / src_data["Close"][low_pivots_index[-2]] >  0.15:
     return False
 
   # 下降数量大于2
@@ -64,10 +64,10 @@ def filter_low_wave(src_data, pivots, security_code, verbose = False):
     return False
   
     # 增加涨幅比例限制
-  raise_1 = abs(src_data["收盘"][high_pivots_index[-2]]-src_data["收盘"][low_pivots_index[-3]])  /src_data["收盘"][low_pivots_index[-3]]
-  raise_2 = abs(src_data["收盘"][high_pivots_index[-1]]-src_data["收盘"][low_pivots_index[-2]]) / src_data["收盘"][low_pivots_index[-2]]
-  fail_1 = abs(src_data["收盘"][high_pivots_index[-2]]-src_data["收盘"][low_pivots_index[-2]])/src_data["收盘"][low_pivots_index[-2]]
-  fail_2 = abs(src_data["收盘"][high_pivots_index[-1]]-src_data["收盘"][low_pivots_index[-1]])/src_data["收盘"][low_pivots_index[-1]]
+  raise_1 = abs(src_data["Close"][high_pivots_index[-2]]-src_data["Close"][low_pivots_index[-3]])  /src_data["Close"][low_pivots_index[-3]]
+  raise_2 = abs(src_data["Close"][high_pivots_index[-1]]-src_data["Close"][low_pivots_index[-2]]) / src_data["Close"][low_pivots_index[-2]]
+  fail_1 = abs(src_data["Close"][high_pivots_index[-2]]-src_data["Close"][low_pivots_index[-2]])/src_data["Close"][low_pivots_index[-2]]
+  fail_2 = abs(src_data["Close"][high_pivots_index[-1]]-src_data["Close"][low_pivots_index[-1]])/src_data["Close"][low_pivots_index[-1]]
   if max(raise_1, raise_2) / min(raise_2, raise_1)  > 2:
     return False
   
@@ -76,8 +76,8 @@ def filter_low_wave(src_data, pivots, security_code, verbose = False):
     return False
 
   # 涨幅
-  raise_lastsecond = abs(src_data["收盘"][raise_lastsecond_end_high_idx] - src_data["收盘"][raise_lastsecond_start_low_idx]) / src_data["收盘"][raise_lastsecond_start_low_idx]
-  raise_last = abs(src_data["收盘"][raise_last_end_high_idx] - src_data["收盘"][raise_last_start_low_idx]) / src_data["收盘"][raise_last_start_low_idx]
+  raise_lastsecond = abs(src_data["Close"][raise_lastsecond_end_high_idx] - src_data["Close"][raise_lastsecond_start_low_idx]) / src_data["Close"][raise_lastsecond_start_low_idx]
+  raise_last = abs(src_data["Close"][raise_last_end_high_idx] - src_data["Close"][raise_last_start_low_idx]) / src_data["Close"][raise_last_start_low_idx]
   if raise_lastsecond < 1.8 * raise_limit or raise_last < 1.8 * raise_limit:
     return True
 
@@ -85,7 +85,7 @@ def filter_low_wave(src_data, pivots, security_code, verbose = False):
   
 
 def filter_high_wave(src_data, pivots, security_code, verbose = False):
-  raise_limit_idx, idx_r, ratio =  tech_base.get_daily_raise_limit(src_data["收盘"], security_code)  
+  raise_limit_idx, idx_r, ratio =  tech_base.get_daily_raise_limit(src_data["Close"], security_code)  
   raise_limit = 0.096
   if ("30" in security_code[0:2]):
     raise_limit = 0.198
@@ -114,9 +114,9 @@ def filter_high_wave(src_data, pivots, security_code, verbose = False):
   if count2 < 1:
     return False
   
-  # 收盘价格与前低点价格对比
-  last_price = np.asarray(src_data["收盘"])[-1]
-  last_lowest_pivot_price = np.asarray(src_data["收盘"])[low_pivots_index[-1]]
+  # close价格与前低点价格对比
+  last_price = np.asarray(src_data["Close"])[-1]
+  last_lowest_pivot_price = np.asarray(src_data["Close"])[low_pivots_index[-1]]
   if last_price > 1.05 * last_lowest_pivot_price :
     return False
   
@@ -129,11 +129,11 @@ def filter_high_wave(src_data, pivots, security_code, verbose = False):
     return False
 
   # 高点更高，低点也更高
-  lasrsecond_lowest_pivot_price = src_data["收盘"][low_pivots_index[-2]]
-  lastthird_lowest_pivot_price = src_data["收盘"][low_pivots_index[-3]]
+  lasrsecond_lowest_pivot_price = src_data["Close"][low_pivots_index[-2]]
+  lastthird_lowest_pivot_price = src_data["Close"][low_pivots_index[-3]]
   
-  last_high_pivot_price = src_data["收盘"][high_pivots_index[-1]]
-  lastsecond_high_pivot_price = src_data["收盘"][high_pivots_index[-2]]
+  last_high_pivot_price = src_data["Close"][high_pivots_index[-1]]
+  lastsecond_high_pivot_price = src_data["Close"][high_pivots_index[-2]]
 
   if not (last_high_pivot_price > lastsecond_high_pivot_price and \
      last_lowest_pivot_price > lasrsecond_lowest_pivot_price and \
@@ -157,7 +157,7 @@ def waveTechFilter(df_dict):
   wave_low_dict = {}
   wave_high_dict = {}
   for code, df_daily in tqdm(df_dict.items()):  
-    close = df_daily["收盘"]    
+    close = df_daily["Close"]    
     close = np.asarray(close)    
 
     pivots_high_wave = tech_base.get_pivots(close, 0.15, 0.08)

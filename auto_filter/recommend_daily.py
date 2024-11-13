@@ -9,6 +9,7 @@ import sys
 import pickle
 import mplfinance as mpf
 import yagmail
+import utils
 
 import matplotlib.pyplot as plt
 
@@ -37,9 +38,9 @@ def dailyTechFilterAndPost():
   print(f"wave_high_dict {wave_high_dict.__len__()} {wave_high_dict.keys()}")
 
   # save pic
-  mail_cont = ["底部涨停回调",]
+  mail_cont = ["two raise limit in bottom",]
   print(f"save pic")
-  save_dir = "/home/yao/workspace/Stock/auto_filter/workdata/"
+  save_dir = utils.getProjectPath("auto_filter")+ "/workdata/"
   for file in os.listdir(save_dir):
     if file.endswith('.png'):
       os.remove(save_dir+file)
@@ -49,13 +50,13 @@ def dailyTechFilterAndPost():
     fig_name = save_dir+"tr_" + code+".png"
     mail_cont.append(yagmail.inline(fig_name))
 
-  mail_cont.append("波动-小波回调")
+  mail_cont.append("wave-small wave")
   for code, pivots in tqdm(wave_low_dcit.items()):
     data_utils.show_stock_data_eastmoney(code, df_dict[code], save_dir= save_dir, predix="wl_")
     fig_name = save_dir +"wl_"+ code+".png"
     mail_cont.append(yagmail.inline(fig_name))
 
-  mail_cont.append("波动-大波回调")
+  mail_cont.append("wave-big wave")
   for code, pivots in tqdm(wave_high_dict.items()):
     data_utils.show_stock_data_eastmoney(code, df_dict[code], save_dir= save_dir, predix="wh_")
     fig_name = save_dir + "wh_" + code+".png"

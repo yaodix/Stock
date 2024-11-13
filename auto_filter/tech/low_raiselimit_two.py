@@ -25,7 +25,7 @@ def raiseLimitTwoImpl(df_daily, code, idx_reverse):
     raise_ratio_exp = 0.09
     raise_limit = 0.198
 
-  close_price = np.asarray(df_daily["收盘"])[-last_idx-1:]
+  close_price = np.asarray(df_daily["Close"])[-last_idx-1:]
   daily_limit_idx, idx_r, diff_ratio = tech_base.get_daily_raise_limit(close_price, code)
   # print(f" {code} {daily_limit_idx.size}")
   if daily_limit_idx.size < 2:
