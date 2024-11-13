@@ -107,8 +107,8 @@ def is_break_low(symbol = str, ratio = 0.6, all_days = 250*5, long_time_days = 2
     
     if min_price_index_after_max > close.size-10 and  min_price_index_after_max > max_price_index and min_price_after_max / max_price < ratio:
       print(code)
-      print(f"max price {max_price}, data {df_daily.loc[max_price_index]['日期']}")
-      print(f"min price {min_price_after_max}, data {df_daily.loc[min_price_index_after_max]['日期']}")
+      print(f"max price {max_price}, data {df_daily.loc[max_price_index]['Date']}")
+      print(f"min price {min_price_after_max}, data {df_daily.loc[min_price_index_after_max]['Date']}")
       # break
     
     # min loc after max loc
@@ -232,9 +232,9 @@ def diweiqidong(ratio = 0.7, all_days = 250*5, long_time_days = 250*3, short_tim
     if  break_ratio and price_diff and days and  min_price_near_index > max_price_index and\
         min_price_near / max_price < ratio and near_price_ratio and cnt <=2  and cnt2 > 3 and last_cmp:
       print(code)
-      print(f"break 1 {break_1_ratio}, data {df_daily.loc[break_1_index]['日期']}")
-      print(f"break 2 {break_2_ratio}, data {df_daily.loc[break_2_index]['日期']}")
-      selected_stocs[code] = [df_daily.loc[break_1_index]['日期'], break_1_ratio, df_daily.loc[break_2_index]['日期'], break_2_ratio]
+      print(f"break 1 {break_1_ratio}, data {df_daily.loc[break_1_index]['Date']}")
+      print(f"break 2 {break_2_ratio}, data {df_daily.loc[break_2_index]['Date']}")
+      selected_stocs[code] = [df_daily.loc[break_1_index]['Date'], break_1_ratio, df_daily.loc[break_2_index]['Date'], break_2_ratio]
       # break
 
   # 两次涨幅和排序
@@ -274,13 +274,13 @@ def WaveCode(long_time_days = 250*3, days_after_max_price_thresh = 250, cur_bump
     # 1.
     idx_max = close_daily.idxmax()
     max_close_price = close_daily.max()
-    # print(f"max_close_price {max_close_price}, day {df_daily.loc[idx_max]['日期']}")
+    # print(f"max_close_price {max_close_price}, day {df_daily.loc[idx_max]['Date']}")
     pivots[idx_max] = max_close_price
 
     # 2. 
     idx_min = close_daily[idx_max:].idxmin()
     min_close_price = close_daily[idx_max:].min()
-    # print(f"min_close_price {min_close_price}, day {df_daily.loc[idx_min]['日期']}")
+    # print(f"min_close_price {min_close_price}, day {df_daily.loc[idx_min]['Date']}")
     pivots[idx_min] = min_close_price
 
     days_after_max_price = idx_min - idx_max
@@ -296,7 +296,7 @@ def WaveCode(long_time_days = 250*3, days_after_max_price_thresh = 250, cur_bump
 
     idx_min_near = close_daily[min(idx_min+5, close_daily.size):].idxmin()
     min_close_price_near = close_daily[min(idx_min+5, close_daily.size):].min()
-    # print(f"min_close_price_near {min_close_price_near}, day {df_daily.loc[idx_min_near]['日期']}")
+    # print(f"min_close_price_near {min_close_price_near}, day {df_daily.loc[idx_min_near]['Date']}")
     pivots[idx_min_near] = min_close_price_near
 
   # 条件： 反弹一段时间，最后反弹幅度小
@@ -307,7 +307,7 @@ def WaveCode(long_time_days = 250*3, days_after_max_price_thresh = 250, cur_bump
     # 反弹区间有涨幅
     idx_max_near = close_daily[idx_min:idx_min_near].idxmax()
     max_close_price_near = close_daily[idx_min:idx_min_near].max()
-    # print(f"max_close_price_near {max_close_price_near}, day {df_daily.loc[idx_max_near]['日期']}")
+    # print(f"max_close_price_near {max_close_price_near}, day {df_daily.loc[idx_max_near]['Date']}")
     pivots[idx_max_near] = max_close_price_near
 
     if max_close_price_near / min_close_price < 0.4:
@@ -316,10 +316,10 @@ def WaveCode(long_time_days = 250*3, days_after_max_price_thresh = 250, cur_bump
     # 最后时间点发生在最近
     if idx_min_near > close_daily.size-7:
       print(f"--------code is {code}----------")
-      print(f"max_close_price {max_close_price}, day {df_daily.loc[idx_max]['日期']}")
-      print(f"min_close_price {min_close_price}, day {df_daily.loc[idx_min]['日期']}")
-      print(f"max_close_price_near {max_close_price_near}, day {df_daily.loc[idx_max_near]['日期']}")
-      print(f"min_close_price_near {min_close_price_near}, day {df_daily.loc[idx_min_near]['日期']}")
+      print(f"max_close_price {max_close_price}, day {df_daily.loc[idx_max]['Date']}")
+      print(f"min_close_price {min_close_price}, day {df_daily.loc[idx_min]['Date']}")
+      print(f"max_close_price_near {max_close_price_near}, day {df_daily.loc[idx_max_near]['Date']}")
+      print(f"min_close_price_near {min_close_price_near}, day {df_daily.loc[idx_min_near]['Date']}")
 
 
 

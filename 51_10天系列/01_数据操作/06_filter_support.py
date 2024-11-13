@@ -70,7 +70,7 @@ if __name__ == "__main__":
 
     val.drop([len(val)-1],inplace=True)
     start_day = dt.datetime.strptime(start_date_str, '%m-%d-%Y').date()
-    df_daily = val[val["日期"]> start_day]
+    df_daily = val[val["Date"]> start_day]
     print(len(df_daily))
     
     X = df_daily["收盘"]

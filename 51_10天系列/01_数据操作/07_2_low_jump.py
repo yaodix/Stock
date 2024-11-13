@@ -87,7 +87,7 @@ if __name__ == "__main__":
     # print(val.tail(5))
     
     
-    df_daily = val[val["日期"]> start_day]
+    df_daily = val[val["Date"]> start_day]
     close_price = np.asarray(df_daily["收盘"])
     # print(pivots)
     # print(data[list(pivots.keys())])

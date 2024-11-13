@@ -268,7 +268,7 @@ if __name__ == "__main__":
     # print(val.tail())
     
     
-    df_daily = val[val["日期"]> start_day]
+    df_daily = val[val["Date"]> start_day]
     
     X = df_daily["收盘"]
     # print(df_daily[:-35].tail(1))

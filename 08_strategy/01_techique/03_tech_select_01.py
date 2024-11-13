@@ -38,13 +38,13 @@ def test(days_after_max_price_thresh = 250, cur_bump_days_thresh = 40):
   # 1.
   idx_max = close_daily.idxmax()
   max_close_price = close_daily.max()
-  print(f"max_close_price {max_close_price}, day {df_daily.loc[idx_max]['日期']}")
+  print(f"max_close_price {max_close_price}, day {df_daily.loc[idx_max]['Date']}")
   pivots[idx_max] = max_close_price
 
   # 2. 
   idx_min = close_daily[idx_max:].idxmin()
   min_close_price = close_daily[idx_max:].min()
-  print(f"min_close_price {min_close_price}, day {df_daily.loc[idx_min]['日期']}")
+  print(f"min_close_price {min_close_price}, day {df_daily.loc[idx_min]['Date']}")
   pivots[idx_min] = min_close_price
 
   days_after_max_price = idx_min - idx_max
@@ -60,7 +60,7 @@ def test(days_after_max_price_thresh = 250, cur_bump_days_thresh = 40):
 
   idx_min_near = close_daily[min(idx_min+5, close_daily.size):].idxmin()
   min_close_price_near = close_daily[min(idx_min+5, close_daily.size):].min()
-  print(f"min_close_price_near {min_close_price_near}, day {df_daily.loc[idx_min_near]['日期']}")
+  print(f"min_close_price_near {min_close_price_near}, day {df_daily.loc[idx_min_near]['Date']}")
   pivots[idx_min_near] = min_close_price_near
 
 # 条件： 反弹一段时间，最后反弹幅度小
@@ -72,7 +72,7 @@ def test(days_after_max_price_thresh = 250, cur_bump_days_thresh = 40):
   # 反弹区间有涨幅
   idx_max_near = close_daily[idx_min:idx_min_near].idxmax()
   max_close_price_near = close_daily[idx_min:idx_min_near].max()
-  print(f"max_close_price_near {max_close_price_near}, day {df_daily.loc[idx_max_near]['日期']}")
+  print(f"max_close_price_near {max_close_price_near}, day {df_daily.loc[idx_max_near]['Date']}")
   pivots[idx_max_near] = max_close_price_near
 
   if max_close_price_near / min_close_price < 0.4:

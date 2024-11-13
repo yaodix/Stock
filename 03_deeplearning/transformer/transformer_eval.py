@@ -3,7 +3,7 @@ import torch
 import numpy as np
 import torch.nn as nn
 import torch.optim as optim
-import torch.utils.data as Data
+import torch.utils.data as Date
 
 from  transformer_demo import tgt_vocab, loader, idx2word, Transformer
 # 姑且把导包也放在这个地方吧

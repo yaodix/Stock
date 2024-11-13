@@ -3,7 +3,7 @@ import torch
 import numpy as np
 import torch.nn as nn
 import torch.optim as optim
-import torch.utils.data as Data
+import torch.utils.data as Date
 # 姑且把导包也放在这个地方吧
  
  
@@ -52,7 +52,7 @@ print(' dec_inputs: \n', dec_inputs)  # dec_inputs: [2,6]
 print(' dec_outputs: \n', dec_outputs) # dec_outputs: [2,6]
 
 # 使用Dataset加载数据
-class MyDataSet(Data.Dataset):
+class MyDataSet(Date.Dataset):
     def __init__(self,enc_inputs, dec_inputs, dec_outputs):
         super(MyDataSet,self).__init__()
         self.enc_inputs = enc_inputs
@@ -68,7 +68,7 @@ class MyDataSet(Data.Dataset):
         return self.enc_inputs[idx], self.dec_inputs[idx], self.dec_outputs[idx]
  
 # 构建DataLoader
-loader = Data.DataLoader(dataset=MyDataSet(enc_inputs,dec_inputs, dec_outputs),batch_size=2,shuffle=True)
+loader = Date.DataLoader(dataset=MyDataSet(enc_inputs,dec_inputs, dec_outputs),batch_size=2,shuffle=True)
 
 # 用来表示一个词的向量长度
 d_model = 512

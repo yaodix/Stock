@@ -84,13 +84,13 @@ def LoadData(pickle_path):
   return df_dict
 
 def show_stock_data_eastmoney(code, df_one, start_date="20200630", end_date="20240530", vline_data = ['2024-08-23']):
-  # 将日期列设置为索引，并转换为 datetime 类型
+  # 将Data列设置为索引，并转换为 datetime 类型
 
-  df_one['日期'] = pd.to_datetime(df_one['日期'])
+  df_one['Date'] = pd.to_datetime(df_one['Date'])
 
   # 调整 DataFrame 列名以符合 mplfinance 的要求
   df_show = df_one.rename(columns={
-    '日期': 'Date',
+    'Date': 'Date',
     '开盘': 'Open',
     '收盘': 'Close',
     '最高': 'High',

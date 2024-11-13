@@ -190,7 +190,7 @@ if __name__ == "__main__":
     start_date_str = '2024-02-10'
     start_day = dt.datetime.strptime(start_date_str, '%Y-%m-%d').date()
     
-    val.set_index('日期', inplace=True)
+    val.set_index('Date', inplace=True)
     src_daily = val.loc[start_day:]
     src_daily.reset_index(inplace=True)
 

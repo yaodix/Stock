@@ -99,7 +99,7 @@ if __name__ == "__main__":
   for ite in test_list:
     test_dict[ite[0]] = df_dict[ite[0]]
     end_day = dt.datetime.date(dt.datetime.strptime(ite[1], "%Y%m%d"))
-    test_dict[ite[0]] = test_dict[ite[0]][test_dict[ite[0]]["日期"] <= end_day]
+    test_dict[ite[0]] = test_dict[ite[0]][test_dict[ite[0]]["Date"] <= end_day]
     
   res_dict = raiseLimitTwo(test_dict)
   print(res_dict)

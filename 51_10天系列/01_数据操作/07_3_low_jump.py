@@ -98,8 +98,8 @@ if __name__ == "__main__":
     # print(val.tail(5))
     
     end_day = dt.datetime.strptime("11-05-2024", '%m-%d-%Y').date()
-    df_daily = val[start_day < val["日期"]]
-    df_daily = df_daily[df_daily["日期"] < end_day]
+    df_daily = val[start_day < val["Date"]]
+    df_daily = df_daily[df_daily["Date"] < end_day]
     # print(df_daily.tail(5))
     close_price = np.asarray(df_daily["收盘"])
     # print(pivots)

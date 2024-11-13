@@ -14,6 +14,7 @@ import matplotlib.pyplot as plt
 def GetSecurityCode():
   '''
   func:get all sh sz sec code, filter ST, new stock, secod new stock
+  ret: df of [code, name]
   '''
   list = []
 
@@ -82,27 +83,35 @@ def dump(security_pool, pickle_file, period_unit, years = 10):
 
   for code in tqdm(pool):    
     df = ak.stock_zh_a_hist(symbol=code, period = period_unit, start_date=start_day, end_date= end_day, adjust= 'qfq')
-    # df.rename(columns={
-    # '日期': 'Date',
-    # '开盘': 'Open',
-    # '收盘': 'Close',
-    # '最高': 'High',
-    # '最低': 'Low',
-    # '成交量': 'Volume'
-    # },inplace=True)
+    df.rename(columns={
+    '日期': 'Date',
+    '股票代码': 'Code',
+    '开盘': 'Open',
+    '收盘': 'Close',
+    '最高': 'High',
+    '最低': 'Low',
+    '成交量': 'Volume',
+    '成交额': 'Amount',
+    '振幅': 'Amplitude',
+    '涨跌幅': 'ChangePct',
+    '涨跌额': 'ChangeAmount',
+    '换手率': 'TurnoverRate'
+    },inplace=True)
     df_dict[code] = df
     # break
     
   with open(pickle_file, 'wb') as handle:
     pickle.dump(df_dict, handle, protocol=pickle.HIGHEST_PROTOCOL)
 
-def LoadPickleData(pickle_path):
+def LoadPickleData(pickle_path, verbose = False):
   if not os.path.exists(pickle_path):
     print("no file " + pickle_path)
     return
     
   with open(pickle_path, 'rb') as handle:
       df_dict = pickle.load(handle) 
+  if verbose:
+    print(f" {pickle_path}\n {df_dict}")
   
   return df_dict
 
@@ -120,7 +129,7 @@ def isTradeDay(trade_date=''):
 
 def show_stock_data_eastmoney(code, df_one, start_date="", end_date="", vline_data = [], save_dir = '', days = 100, predix = ''):
   '''
-    vline_data:['2024-08-23']
+    vline_data:['2024-xx-xx']
   '''
 
   if start_date == "":
@@ -129,18 +138,9 @@ def show_stock_data_eastmoney(code, df_one, start_date="", end_date="", vline_da
 
   if end_date == "":
     end_date = dt.date.today().strftime("%Y%m%d")
-  # 将日期列设置为索引，并转换为 datetime 类型
-  df_one['日期'] = pd.to_datetime(df_one['日期'])
+  # 将Data列设置为索引，并转换为 datetime 类型
+  df_one['Date'] = pd.to_datetime(df_one['Date'])
 
-  # 调整 DataFrame 列名以符合 mplfinance 的要求
-  df_show = df_one.rename(columns={
-    '日期': 'Date',
-    '开盘': 'Open',
-    '收盘': 'Close',
-    '最高': 'High',
-    '最低': 'Low',
-    '成交量': 'Volume'
-  })
   df_show.set_index('Date', inplace=True)
   df_show = df_show.loc[start_date:end_date]
 
@@ -163,13 +163,22 @@ def show_stock_data_eastmoney(code, df_one, start_date="", end_date="", vline_da
   
   # mpf.show()
 
-def updateToLatestDay(pickle_file, period_unit):
+def updateToLatestDay(pickle_file, period_unit, years):
   '''
   update data to latest day
   '''
-  df_dict = LoadPickleData(pickle_file)
+  if not os.path.exists(pickle_file):
+    dir = os.path.dirname(pickle_file)
+    if not os.path.exists(dir):
+      os.makedirs(dir)
+    df = GetSecurityCode()  
+    dump(df, pickle_file, period_unit , years)
+    df_dict = LoadPickleData(pickle_file, True)
+    return  df_dict
+    
+  df_dict = LoadPickleData(pickle_file, True)
   first_df = next(iter(df_dict.values()))
-  last_date = first_df['日期'].iloc[-1]
+  last_date = first_df['Date'].iloc[-1]
   last_date = last_date + dt.timedelta(days=1)
   # last_date = last_date
   cur_data = dt.date.today()
@@ -183,7 +192,7 @@ def updateToLatestDay(pickle_file, period_unit):
     print(f"update data to today, last day {last_date}")  
     for code, df in tqdm(df_dict.items()):
       add_df = ak.stock_zh_a_hist(symbol=code, period = period_unit, start_date=last_date_str, end_date= cur_data_str, adjust= 'qfq')
-      if df['日期'].iloc[-1]== add_df['日期'].iloc[0]:
+      if df['Date'].iloc[-1]== add_df['Date'].iloc[0]:
          df.drop(df.index[-1], inplace=True)
       df = df.append(add_df, ignore_index=True)
       df_dict[code] = df
@@ -199,7 +208,7 @@ if __name__ == '__main__':
   monthly_path = './sec_data/monthly.pickle' 
   weekly_path = './sec_data/weekly.pickle'
   daily_path = './sec_data/daily.pickle'
-  df = GetSecurityCode()  
-  dump(df, daily_path,'daily', 1)
-  # dump(df, weekly_path,'weekly', 50)
-  # dump(df, monthly_path,'monthly', 50)
+
+  updateToLatestDay(daily_path, 'daily', 1)
+  # updateToLatestDay(weekly_path, 'weekly', 1)
+  # updateToLatestDay(monthly_path, 'monthly', 1)
