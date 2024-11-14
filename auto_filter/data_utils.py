@@ -185,10 +185,10 @@ def show_stock_data_eastmoney(code, df_one, start_date="", end_date="", vline_da
 
   if end_date == "":
     end_date = dt.date.today().strftime("%Y%m%d")
-  # 将Data列设置为索引，并转换为 datetime 类型
   df_one.reset_index(inplace=True)
   df_one['Date'] = pd.to_datetime(df_one['Date'])
 
+  # 将Data列设置为索引，并转换为 datetime 类型
   df_one.set_index('Date', inplace=True)
   df_show = df_one.loc[start_date:end_date]
 
@@ -232,18 +232,38 @@ def updateToLatestDay(pickle_file, period_unit, years):
   cur_data = dt.date.today()
   last_date_str = last_date.strftime("%Y%m%d")
   cur_data_str = cur_data.strftime("%Y%m%d")   
-  if not isTradeDay(last_date_str) and cur_data-last_date < dt.timedelta(days=2):
+  if not isTradeDay(last_date_str) and cur_data-last_date < dt.timedelta(days=0):
     print(f"no need to update data")
     return df_dict
   
   else:
     print(f"update data to today, last day {last_date}")  
     for code, df in tqdm(df_dict.items()):
+      # if  "000973" not in code:
+      #   continue
+      # print(f"code {code}")
       add_df = ak.stock_zh_a_hist(symbol=code, period = period_unit, start_date=last_date_str, end_date= cur_data_str, adjust= 'qfq')
-      if df['Date'].iloc[-1]== add_df['Date'].iloc[0]:
-         df.drop(df.index[-1], inplace=True)
-      df = df.append(add_df, ignore_index=True)
-      df_dict[code] = df
+      if  not add_df.empty:
+        # add_df.reset_index(inplace=True)
+
+        add_df.rename(columns={
+          '日期': 'Date',
+          '股票代码': 'Code',
+          '开盘': 'Open',
+          '收盘': 'Close',
+          '最高': 'High',
+          '最低': 'Low',
+          '成交量': 'Volume',
+          '成交额': 'Amount',
+          '振幅': 'Amplitude',
+          '涨跌幅': 'ChangePct',
+          '涨跌额': 'ChangeAmount',
+          '换手率': 'TurnoverRate'
+          },inplace=True)
+        if df['Date'].iloc[-1]== add_df['Date'].iloc[0]:
+          df.drop(df.index[-1], inplace=True)
+        df = df.append(add_df, ignore_index=True)
+        df_dict[code] = df
       # break
 
     with open(pickle_file, 'wb') as handle:
