@@ -10,6 +10,8 @@ import mplfinance as mpf
 from scipy import interpolate
 
 import matplotlib.pyplot as plt
+import warnings
+warnings.filterwarnings("ignore")
 
 
 def GetSecurityCode():
@@ -128,6 +130,27 @@ def isTradeDay(trade_date=''):
   else:
     return True
 
+def DataIsUpdate(df_dict):
+  '''
+  func: check if data is update
+  '''
+  if df_dict is None:
+    return False
+  else:
+    first_df = next(iter(df_dict.values()))
+    last_date = first_df['Date'].iloc[-1]
+    cur_date = dt.date.today().strftime("%Y%m%d")
+    cur_df = ak.stock_zh_a_hist(symbol="000001", period = 'daily', start_date=last_date,
+                                end_date= cur_date, adjust= 'qfq')
+    if cur_df.empty:
+      return True
+    
+    if cur_df['日期'].iloc[-1]== first_df['Date'].iloc[-1] and cur_df['收盘'].iloc[-1]== first_df['Close'].iloc[-1] and \
+        cur_df['最低'].iloc[-1]== first_df['Low'].iloc[-1] and cur_df['最高'].iloc[-1]== first_df['High'].iloc[-1]:
+       return True
+    else:
+      return False
+
 
 def plot_pivots(X, pivots):
     plt.xlim(0, len(X))
@@ -210,6 +233,13 @@ def show_stock_data_eastmoney(code, df_one, start_date="", end_date="", vline_da
        )
   
   # mpf.show()
+def outputFileInfo(df_dict):
+  '''
+  输出000001 最后1行数据
+  '''
+  first_df = next(iter(df_dict.values()))
+  print(f"000001 info")
+  print(first_df.tail(1))
 
 def updateToLatestDay(pickle_file, period_unit, years):
   '''
@@ -225,27 +255,25 @@ def updateToLatestDay(pickle_file, period_unit, years):
     return  df_dict
     
   df_dict = LoadPickleData(pickle_file, True)
-  first_df = next(iter(df_dict.values()))
-  last_date = first_df['Date'].iloc[-1]
-  last_date = last_date + dt.timedelta(days=1)
-  # last_date = last_date
-  cur_data = dt.date.today()
-  last_date_str = last_date.strftime("%Y%m%d")
-  cur_data_str = cur_data.strftime("%Y%m%d")   
-  if not isTradeDay(last_date_str) and cur_data-last_date < dt.timedelta(days=0):
-    print(f"no need to update data")
+  if DataIsUpdate(df_dict):
+    print(f"data is latest, no need to update")
     return df_dict
   
   else:
-    print(f"update data to today, last day {last_date}")  
+    first_df = next(iter(df_dict.values()))
+    last_date = first_df['Date'].iloc[-1]
+    # last_date = last_date + dt.timedelta(days=1)
+    cur_data = dt.date.today()
+    last_date_str = last_date.strftime("%Y%m%d")
+    cur_data_str = cur_data.strftime("%Y%m%d")   
+    outputFileInfo(df_dict)
+    print(f"df last day {last_date}, update data to {cur_data}")  
     for code, df in tqdm(df_dict.items()):
       # if  "000973" not in code:
       #   continue
       # print(f"code {code}")
       add_df = ak.stock_zh_a_hist(symbol=code, period = period_unit, start_date=last_date_str, end_date= cur_data_str, adjust= 'qfq')
       if  not add_df.empty:
-        # add_df.reset_index(inplace=True)
-
         add_df.rename(columns={
           '日期': 'Date',
           '股票代码': 'Code',

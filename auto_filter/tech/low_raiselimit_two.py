@@ -86,21 +86,26 @@ def raiseLimitTwo(df_dict):
   return select_dic
 
 
-test_list = [
-             ["000826", "20241101"],
-             ["600839", "20240829"],  # sichuanchanghong
-  ["603787", "20240408"],
+test_map = {
+             "002607": ["20241114"],
+             "000826": ["20241101"],
+             "600839": ["20240829"],  # sichuanchanghong
+             "603787": ["20240408"],
              
-             ]
+            }
 
 if __name__ == "__main__":
   df_dict = data_utils.LoadPickleData(pro_path+"/sec_data/daily.pickle")
+  test_cnt = 0
+  for key, val in test_map.items():
+    test_cnt += val.__len__()
 
   test_dict = {}
-  for ite in test_list:
-    test_dict[ite[0]] = df_dict[ite[0]]
-    end_day = dt.datetime.date(dt.datetime.strptime(ite[1], "%Y%m%d"))
-    test_dict[ite[0]] = test_dict[ite[0]][test_dict[ite[0]]["Date"] <= end_day]
+  for key, val in test_map.items():
+    test_dict[key] = df_dict[key]
+    for date in val:
+      end_day = dt.datetime.date(dt.datetime.strptime(date, "%Y%m%d"))
+      test_dict[key] = test_dict[key][test_dict[key]["Date"] <= end_day]
     
-  res_dict = raiseLimitTwo(test_dict)
+      res_dict = raiseLimitTwo(test_dict)
   print(res_dict)

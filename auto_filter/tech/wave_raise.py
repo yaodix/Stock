@@ -153,7 +153,7 @@ def filter_high_wave(src_data, pivots, security_code, verbose = False):
     
   return False
   
-def waveTechFilter(df_dict):
+def waveTechFilter(df_dict, enable_high = False, enable_low = True):
   '''
   ret: code_pivot dict
   '''
@@ -163,58 +163,78 @@ def waveTechFilter(df_dict):
     close = df_daily["Close"]    
     close = np.asarray(close)    
 
-    pivots_high_wave = tech_base.get_pivots(close, 0.15, 0.08)
-    pivots_low_wave = tech_base.get_pivots(close, 0.096, 0.05)
-    # data_utils.plot_pivots(df_daily["Close"], pivots_low_wave)
-    
-    sel1 = filter_high_wave(df_daily, pivots_high_wave, code)
-    sel2 = filter_low_wave(df_daily, pivots_low_wave, code)
-    # data_utils.plot_pivot_line(df_daily["Close"], pivots_low_wave)
+    if enable_high:
+      pivots_high_wave = tech_base.get_pivots(close, 0.15, 0.11)
+      data_utils.plot_pivots(df_daily["Close"], pivots_high_wave)
+      data_utils.plot_pivot_line(df_daily["Close"], pivots_high_wave)
 
-    if sel1:
-      wave_high_dict[code] = pivots_high_wave
-    if sel2:
-      wave_low_dict[code] = pivots_low_wave
+      sel1 = filter_high_wave(df_daily, pivots_high_wave, code)
+      if sel1:
+        wave_high_dict[code] = pivots_high_wave
+    if enable_low:
+      pivots_low_wave = tech_base.get_pivots(close, 0.096, 0.05)
+      sel2 = filter_low_wave(df_daily, pivots_low_wave, code)
+      # data_utils.plot_pivots(df_daily["Close"], pivots_low_wave)
+      # data_utils.plot_pivot_line(df_daily["Close"], pivots_low_wave)
+      if sel2:
+        wave_low_dict[code] = pivots_low_wave
+
   return wave_low_dict, wave_high_dict
 
+
+def test_low_wave(df_dict, test_map):
+  test_cnt = 0
+  for key, val in test_map.items():
+    test_cnt += val.__len__()
+
+  test_dict = {}
+  for key, val in test_map.items():
+    test_dict[key] = df_dict[key]
+    for date in val:
+      end_day = dt.datetime.date(dt.datetime.strptime(date, "%Y%m%d"))
+      test_dict[key] = test_dict[key][test_dict[key]["Date"] <= end_day]
+    
+      wave_low_dict, wave_high_dict = waveTechFilter(test_dict, enable_high = False)
+  # print(wave_low_dict)
+  return wave_low_dict
+
+def test_high_wave(df_dict, test_map):
+  test_cnt = 0
+  for key, val in test_map.items():
+    test_cnt += val.__len__()
+
+  test_dict = {}
+  for key, val in test_map.items():
+    test_dict[key] = df_dict[key]
+    for date in val:
+      end_day = dt.datetime.date(dt.datetime.strptime(date, "%Y%m%d"))
+      test_dict[key] = test_dict[key][test_dict[key]["Date"] <= end_day]
+    
+      wave_low_dict, wave_high_dict = waveTechFilter(test_dict, enable_low = False)
+  # print(wave_high_dict)
+  return wave_high_dict
 
 '''
 low wave测试集合
 '''
-high_wave_test = [                 
-                 ["603787", "20241022"],
-                 ]
+high_wave_dict = {                
+                 "000627": ["20241017"],
+                 "603787": ["20241022"],
+                 "000859": ["20241011"],
+                 }
 
-low_wave_test = [
-  ["000826", "20241104"],
-  # ["603787", "20240408"],
-  ["603787", "20240428"],
-  ["603196", "20240829"],  # 
-]
+low_wave_dict = {
+  "000826": ["20241104"],
+  "603787": ["20240408", "20240428"],
+  "603196": ["20240829"],   
 
-test_tmp = [
-  ["600769", "20241114"]
-]
-
-def test_low_wave():
-  pass
-
-def test_high_wave():
-  pass
-
-
+}
 
 if __name__ == "__main__":
   pickle_path = '/home/yao/workspace/Stock/auto_filter/sec_data/daily.pickle' 
   df_dict = data_utils.LoadPickleData(pickle_path)
-  test_dict = {}
-  for ite in low_wave_test:
-    test_dict[ite[0]] = df_dict[ite[0]]
-    end_day = dt.datetime.date(dt.datetime.strptime(ite[1], "%Y%m%d"))
-    test_dict[ite[0]] = test_dict[ite[0]][test_dict[ite[0]]["Date"] <= end_day]
-
-  wave_low_dict, wave_high_dict = waveTechFilter(test_dict)
-
+  wave_low_dict = test_low_wave(df_dict, low_wave_dict)
   print(f"wave_low_dict {wave_low_dict.keys()}")
+  # wave_high_dict = test_high_wave(df_dict, high_wave_dict)
   # print(f"wave_high_dict {wave_high_dict.keys()}")
 
