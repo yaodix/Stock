@@ -16,6 +16,7 @@ import matplotlib.pyplot as plt
 import data_utils
 from tech.low_raiselimit_two import raiseLimitTwo
 from tech.wave_raise import waveTechFilter
+from tech.wave_struct import GetWaveStructureWeekly
 import warnings
 warnings.filterwarnings("ignore")
 
@@ -37,6 +38,9 @@ def dailyTechFilterAndPost():
   print(f"wave_low_dcit size {wave_low_dcit.__len__()} {wave_low_dcit.keys()}")
   print(f"wave_high_dict {wave_high_dict.__len__()} {wave_high_dict.keys()}")
 
+  weekly_df_dict = data_utils.updateToLatestDay(weekly_pickle_path, "weekly", 2)
+  weekly_wave_res = GetWaveStructureWeekly(weekly_df_dict)
+  print(f"weekly_wave_res {weekly_wave_res.__len__()} {weekly_wave_res}")
   # save pic
   mail_cont = ["two raise limit in bottom",]
   print(f"save pic")
@@ -60,6 +64,12 @@ def dailyTechFilterAndPost():
   for code, pivots in tqdm(wave_high_dict.items()):
     data_utils.show_stock_data_eastmoney(code, df_dict[code], save_dir= save_dir, predix="wh_")
     fig_name = save_dir + "wh_" + code+".png"
+    mail_cont.append(yagmail.inline(fig_name))
+
+  mail_cont.append("weekly_wave ")
+  for code in tqdm(weekly_wave_res):
+    data_utils.show_stock_data_eastmoney(code, weekly_df_dict[code], save_dir= save_dir, predix="weekklywave_", days=100*6)
+    fig_name = save_dir + "weely_" + code+".png"
     mail_cont.append(yagmail.inline(fig_name))
   
   # post to mail
