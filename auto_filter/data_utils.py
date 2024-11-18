@@ -305,6 +305,6 @@ if __name__ == '__main__':
   weekly_path = './sec_data/weekly.pickle'
   daily_path = './sec_data/daily.pickle'
 
-  updateToLatestDay(daily_path, 'daily', 1)
-  # updateToLatestDay(weekly_path, 'weekly', 1)
+  # updateToLatestDay(daily_path, 'daily', 1)
+  updateToLatestDay(weekly_path, 'weekly', 2)
   # updateToLatestDay(monthly_path, 'monthly', 1)

@@ -107,11 +107,11 @@ def get_pivots(data, raise_thresh = 0.1, fall_thresh = 0.07):
   if last_trend == 1: # 最后一波是amp，
     start_key = sorted(pivots.keys())[-1]
     last_idx = np.argmax(data[start_key:])
-    pivots[start_key+last_idx] = 1
+    pivots[start_key+int(last_idx)] = 1
   else:
     start_key = sorted(pivots.keys())[-1]
     last_idx = np.argmin(data[start_key:])
-    pivots[start_key+last_idx] = -1
+    pivots[start_key+int(last_idx)] = -1
   
     
   return pivots

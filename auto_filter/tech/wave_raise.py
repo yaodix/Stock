@@ -117,7 +117,7 @@ def filter_high_wave(src_data, pivots, security_code, verbose = False):
   if count2 < 1 or count2 > 4:
     return False
   
-  # close价格与前低点价格对比
+  # 最新实时价格与最新低点价格对比
   last_price = np.asarray(src_data["Close"])[-1]
   last_lowest_pivot_price = np.asarray(src_data["Close"])[low_pivots_index[-1]]
   if last_price > 1.05 * last_lowest_pivot_price :
@@ -131,16 +131,19 @@ def filter_high_wave(src_data, pivots, security_code, verbose = False):
   if decade_last_end_low_idx - raise_last_end_high_idx < 3:
     return False
 
-  # 高点更高，低点也更高
-  lasrsecond_lowest_pivot_price = src_data["Close"][low_pivots_index[-2]]
+  # 低点不能越来越低
+  lastsecond_lowest_pivot_price = src_data["Close"][low_pivots_index[-2]]
   lastthird_lowest_pivot_price = src_data["Close"][low_pivots_index[-3]]
   
   last_high_pivot_price = src_data["Close"][high_pivots_index[-1]]
   lastsecond_high_pivot_price = src_data["Close"][high_pivots_index[-2]]
 
-  if not (last_high_pivot_price > lastsecond_high_pivot_price and \
-     last_lowest_pivot_price > lasrsecond_lowest_pivot_price and \
-     lasrsecond_lowest_pivot_price > lastthird_lowest_pivot_price):
+  # if not (last_high_pivot_price > lastsecond_high_pivot_price and \
+  #    last_lowest_pivot_price > lastsecond_lowest_pivot_price and \
+  #    lastsecond_lowest_pivot_price > lastthird_lowest_pivot_price):
+  #   return False
+  if last_lowest_pivot_price < lastsecond_lowest_pivot_price*0.95 or \
+     lastsecond_lowest_pivot_price < lastthird_lowest_pivot_price*0.95 :
     return False
   
    # 两边时间间隔
@@ -153,7 +156,7 @@ def filter_high_wave(src_data, pivots, security_code, verbose = False):
     
   return False
   
-def waveTechFilter(df_dict, enable_high = False, enable_low = True):
+def waveTechFilter(df_dict, enable_high = True, enable_low = True):
   '''
   ret: code_pivot dict
   '''
@@ -165,8 +168,8 @@ def waveTechFilter(df_dict, enable_high = False, enable_low = True):
 
     if enable_high:
       pivots_high_wave = tech_base.get_pivots(close, 0.15, 0.11)
-      data_utils.plot_pivots(df_daily["Close"], pivots_high_wave)
-      data_utils.plot_pivot_line(df_daily["Close"], pivots_high_wave)
+      # data_utils.plot_pivots(df_daily["Close"], pivots_high_wave)
+      # data_utils.plot_pivot_line(df_daily["Close"], pivots_high_wave)
 
       sel1 = filter_high_wave(df_daily, pivots_high_wave, code)
       if sel1:
