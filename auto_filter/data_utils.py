@@ -238,7 +238,7 @@ def show_stock_data_eastmoney(code, df_one, start_date="", end_date="", vline_da
   '''
 
   if start_date == "":
-    start_date = dt.date.today() - dt.timedelta(days=100)
+    start_date = dt.date.today() - dt.timedelta(days=days)
     start_date = start_date.strftime("%Y%m%d")
 
   if end_date == "":
