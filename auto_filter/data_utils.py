@@ -10,6 +10,7 @@ import mplfinance as mpf
 from scipy import interpolate
 
 import matplotlib.pyplot as plt
+from ./tech/board_class import LoadSwClassDict
 import warnings
 warnings.filterwarnings("ignore")
 
@@ -64,6 +65,37 @@ def GetSecurityCode():
   
   return df     
 
+def getMarketCapDict(code_list):
+  code_cap_dict = {}
+  print(f"get market cap")
+  for code in tqdm(code_list):
+    stock_individual_info_em_df = ak.stock_individual_info_em(symbol=code)
+    cap = stock_individual_info_em_df.iloc[4]["value"]
+    code_cap_dict[code] = cap
+  return code_cap_dict
+
+def industryLeaderSW():
+  '''
+  sw class leader, class: code
+  '''
+  thirdclass_code_dict,_,_ = LoadSwClassDict()
+  all_code =  [code for codes in thirdclass_code_dict.values() for code in codes]
+  code_cap_dict =  getMarketCapDict(all_code)
+  sector_leader_dict = {}
+  for key in thirdclass_code_dict.keys():
+    code_list = thirdclass_code_dict[key]
+    cap_list = [code_cap_dict[code] for code in code_list]
+    cap_list = np.array(cap_list)
+    leader_idx = np.argmax(cap_list)
+    sector_leader_dict[key] = code_list[leader_idx]
+    
+  return sector_leader_dict
+
+
+def A500Code():
+  index_stock_cons_df = ak.index_stock_cons(symbol="000905")  # 中证A500的指数代码为000905
+  A500_code_list = list(index_stock_cons_df['品种代码'])
+  return A500_code_list
 
 def dump(security_pool, pickle_file, period_unit, years = 10):
   '''
@@ -113,6 +145,7 @@ def LoadPickleData(pickle_path, verbose = False):
     
   with open(pickle_path, 'rb') as handle:
       df_dict = pickle.load(handle) 
+      print(f"load pickle file: {pickle_path}")
   # if verbose:
     # print(f" {pickle_path}\n {df_dict}")
   
@@ -121,6 +154,8 @@ def LoadPickleData(pickle_path, verbose = False):
 def isTradeDay(trade_date=''):
   '''
   func: check if trade day
+  args:
+    trade_date: "%Y%m%d" string date, default is today
   '''
   if trade_date == '':
     trade_date = dt.date.today().strftime("%Y%m%d")
@@ -257,6 +292,7 @@ def updateToLatestDay(pickle_file, period_unit, years):
   df_dict = LoadPickleData(pickle_file, True)
   if DataIsUpdate(df_dict):
     print(f"data is latest, no need to update")
+    print(df_dict["000402"].tail(1))
     return df_dict
   
   else:
@@ -290,7 +326,7 @@ def updateToLatestDay(pickle_file, period_unit, years):
           },inplace=True)
         if df['Date'].iloc[-1]== add_df['Date'].iloc[0]:
           df.drop(df.index[-1], inplace=True)
-        df = df.append(add_df, ignore_index=True)
+        df = pd.concat([df, add_df], ignore_index=True)
         df_dict[code] = df
       # break
 
@@ -305,6 +341,6 @@ if __name__ == '__main__':
   weekly_path = './sec_data/weekly.pickle'
   daily_path = './sec_data/daily.pickle'
 
-  # updateToLatestDay(daily_path, 'daily', 1)
-  updateToLatestDay(weekly_path, 'weekly', 2)
+  updateToLatestDay(daily_path, 'daily', 1)
+  # updateToLatestDay(weekly_path, 'weekly', 2)
   # updateToLatestDay(monthly_path, 'monthly', 1)
