@@ -1,4 +1,6 @@
-
+'''
+two raiselimit and decade recently, but price not raise too much
+'''
 import sys
 import os
 import numpy as np

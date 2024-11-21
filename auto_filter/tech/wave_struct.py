@@ -1,5 +1,5 @@
 '''
-清晰结构
+weekly wave structure support weekly
 '''
 import datetime as dt
 import pandas as pd

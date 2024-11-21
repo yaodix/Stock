@@ -1,3 +1,7 @@
+'''
+wave in sequence, must have raiselimit
+'''
+
 import sys
 import os
 import akshare as ak

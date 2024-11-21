@@ -17,6 +17,7 @@ import data_utils
 from tech.low_raiselimit_two import raiseLimitTwo
 from tech.wave_raise import waveTechFilter
 from tech.wave_struct import GetWaveStructureWeekly
+from tech.wave_event import GetWaveSupportDaily, GetWaveSupportWeekly
 import warnings
 warnings.filterwarnings("ignore")
 
@@ -34,13 +35,20 @@ def dailyTechFilterAndPost():
   code_dict = raiseLimitTwo(df_dict)
   print(f"raiseLimitTwo size {code_dict.__len__()} {code_dict.keys()}")
 
-  wave_low_dcit, wave_high_dict = waveTechFilter(df_dict)
+  wave_low_dcit, wave_high_dict = waveTechFilter(df_dict,enable_high=True)
   print(f"wave_low_dcit size {wave_low_dcit.__len__()} {wave_low_dcit.keys()}")
   print(f"wave_high_dict {wave_high_dict.__len__()} {wave_high_dict.keys()}")
+  
+  daily_horizon_dict, daily_slope_dict = GetWaveSupportDaily(df_dict)
+  print(f"daily_horizon_dict {daily_horizon_dict.__len__()} {daily_horizon_dict.keys()}")
+  print(f"daily_slope_dict {daily_slope_dict.__len__()} {daily_slope_dict.keys()}")
 
   weekly_df_dict = data_utils.updateToLatestDay(weekly_pickle_path, "weekly", 2)
   weekly_wave_res = GetWaveStructureWeekly(weekly_df_dict)
+  weekly_horizon_dict, weekly_slope_dict = GetWaveSupportWeekly(weekly_df_dict)
   print(f"weekly_wave_res {weekly_wave_res.__len__()} {weekly_wave_res}")
+  print(f"weekly_horizon_dict {weekly_horizon_dict.__len__()} {weekly_horizon_dict}")
+  print(f"weekly_slope_dict {weekly_slope_dict.__len__()} {weekly_slope_dict}")
   # save pic
   mail_cont = ["two raise limit in bottom",]
   print(f"save pic")
@@ -70,6 +78,29 @@ def dailyTechFilterAndPost():
   for code in tqdm(weekly_wave_res):
     data_utils.show_stock_data_eastmoney(code, weekly_df_dict[code], save_dir= save_dir, predix="weekklywave_", days=100*6)
     fig_name = save_dir + "weely_" + code+".png"
+    mail_cont.append(yagmail.inline(fig_name))
+    
+  mail_cont.append("daily_horizon ")
+  for code in tqdm(daily_horizon_dict.items()):
+    data_utils.show_stock_data_eastmoney(code, df_dict[code], save_dir= save_dir, predix="daily_horizon_", days=100*6)
+    fig_name = save_dir + "daily_horizon_" + code+".png"
+    mail_cont.append(yagmail.inline(fig_name))  
+  mail_cont.append("daily_slope ")
+  for code in tqdm(daily_slope_dict.items()):
+    data_utils.show_stock_data_eastmoney(code, df_dict[code], save_dir= save_dir, predix="daily_slope_", days=100*6)
+    fig_name = save_dir + "daily_slope_" + code+".png"
+    mail_cont.append(yagmail.inline(fig_name))
+    
+  mail_cont.append("weekly_horizon ")
+  for code in tqdm(weekly_horizon_dict.items()):
+    data_utils.show_stock_data_eastmoney(code, weekly_df_dict[code], save_dir= save_dir, predix="weekly_horizon_", days=100*6)
+    fig_name = save_dir + "weekly_horizon_" + code+".png"
+    mail_cont.append(yagmail.inline(fig_name))
+    
+  mail_cont.append("weekly_slope ")
+  for code in tqdm(weekly_slope_dict.items()):
+    data_utils.show_stock_data_eastmoney(code, weekly_df_dict[code], save_dir= save_dir, predix="weekly_slope_", days=100*6)
+    fig_name = save_dir + "weekly_slope_" + code+".png"
     mail_cont.append(yagmail.inline(fig_name))
   
   # post to mail

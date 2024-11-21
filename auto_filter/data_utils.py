@@ -385,8 +385,8 @@ if __name__ == '__main__':
   monthly_path = './sec_data/monthly.pickle'
   weekly_path = './sec_data/weekly.pickle'
   daily_path = './sec_data/daily.pickle'
-  test_getA500AndLeader()
+  # test_getA500AndLeader()
 
-  # updateToLatestDay(daily_path, 'daily', 1)
-  # updateToLatestDay(weekly_path, 'weekly', 2)
+  updateToLatestDay(daily_path, 'daily', 1)
+  updateToLatestDay(weekly_path, 'weekly', 2)
   # updateToLatestDay(monthly_path, 'monthly', 1)
