@@ -8,12 +8,18 @@ import os
 import pickle
 import mplfinance as mpf
 from scipy import interpolate
-
+import json
+import re
 import matplotlib.pyplot as plt
-from ./tech/board_class import LoadSwClassDict
 import warnings
 warnings.filterwarnings("ignore")
 
+
+def keep_only_digits(s):
+    # 使用正则表达式匹配字符串中的所有数字
+    digits_only = re.sub(r'\D', '', s)
+    return digits_only
+  
 
 def GetSecurityCode():
   '''
@@ -65,6 +71,28 @@ def GetSecurityCode():
   
   return df     
 
+
+def LoadSwClassDict():
+  thirdclass_code_dict = {}
+  code_class_dict = {}
+  firstclass_code_dict = {}
+  wb = pd.read_excel('./sec_data/swclasslatest.xlsx')
+  for i in range(len(wb)):
+    institue = wb['交易所'][i]
+    if institue == 'A股':
+      code = keep_only_digits(wb['股票代码'][i])
+      first_industry = wb['新版一级行业'][i]
+      third_industry = wb['新版三级行业'][i]
+      code_class_dict[code] = third_industry
+      if third_industry not in thirdclass_code_dict:
+        thirdclass_code_dict[third_industry] = []
+      thirdclass_code_dict[third_industry].append(code)
+      
+      if first_industry not in firstclass_code_dict:
+        firstclass_code_dict[first_industry] = []
+      firstclass_code_dict[first_industry].append(code)
+      
+  return thirdclass_code_dict, code_class_dict, firstclass_code_dict
 def getMarketCapDict(code_list):
   code_cap_dict = {}
   print(f"get market cap")
@@ -72,27 +100,38 @@ def getMarketCapDict(code_list):
     stock_individual_info_em_df = ak.stock_individual_info_em(symbol=code)
     cap = stock_individual_info_em_df.iloc[4]["value"]
     code_cap_dict[code] = cap
+    
   return code_cap_dict
 
-def industryLeaderSW():
+def getIndustryLeaderCodeDictSW(order_num = 3, json_path = './sec_data/swclass_sorted_dict.json'):
   '''
-  sw class leader, class: code
+  sw class leader dict, class: code
   '''
-  thirdclass_code_dict,_,_ = LoadSwClassDict()
+  if os.path.exists(json_path):
+    with open(json_path, 'r') as handle:
+      return json.load(handle)
+    
+  thirdclass_code_dict, _, _ = LoadSwClassDict()
   all_code =  [code for codes in thirdclass_code_dict.values() for code in codes]
   code_cap_dict =  getMarketCapDict(all_code)
   sector_leader_dict = {}
   for key in thirdclass_code_dict.keys():
     code_list = thirdclass_code_dict[key]
     cap_list = [code_cap_dict[code] for code in code_list]
-    cap_list = np.array(cap_list)
-    leader_idx = np.argmax(cap_list)
-    sector_leader_dict[key] = code_list[leader_idx]
+    cap_array = np.array(cap_list)
     
+    sorted_indices = np.argsort(cap_array)[::-1]
+    if key not in sector_leader_dict:
+      sector_leader_dict[key] = []
+    sector_leader_dict[key].append(np.array(code_list)[sorted_indices[:order_num]].tolist())
+  
+  with open(json_path, 'w', encoding='utf-8') as handle:
+    json.dump(sector_leader_dict, handle, ensure_ascii=False, indent=2)
+      
   return sector_leader_dict
 
 
-def A500Code():
+def getA500Code():
   index_stock_cons_df = ak.index_stock_cons(symbol="000905")  # 中证A500的指数代码为000905
   A500_code_list = list(index_stock_cons_df['品种代码'])
   return A500_code_list
@@ -335,12 +374,19 @@ def updateToLatestDay(pickle_file, period_unit, years):
       
     return df_dict
      
+def test_getA500AndLeader():
+  a500 = getA500Code()
+  print(a500.__len__())
+  leader = getIndustryLeaderCodeDictSW()
+  print(leader.__len__())
+  
 
 if __name__ == '__main__':
-  monthly_path = './sec_data/monthly.pickle' 
+  monthly_path = './sec_data/monthly.pickle'
   weekly_path = './sec_data/weekly.pickle'
   daily_path = './sec_data/daily.pickle'
+  test_getA500AndLeader()
 
-  updateToLatestDay(daily_path, 'daily', 1)
+  # updateToLatestDay(daily_path, 'daily', 1)
   # updateToLatestDay(weekly_path, 'weekly', 2)
   # updateToLatestDay(monthly_path, 'monthly', 1)

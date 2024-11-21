@@ -15,34 +15,6 @@ sys.path.append(pro_path)
 import tech.tech_base as tech_base
 import data_utils
 
-def keep_only_digits(s):
-    # 使用正则表达式匹配字符串中的所有数字
-    digits_only = re.sub(r'\D', '', s)
-    return digits_only
-  
-
-def LoadSwClassDict():
-  thirdclass_code_dict = {}
-  code_class_dict = {}
-  firstclass_code_dict = {}
-  wb = pd.read_excel(pro_path+'/sec_data/swclasslatest.xlsx')
-  for i in range(len(wb)):
-    institue = wb['交易所'][i]
-    if institue == 'A股':
-      code = keep_only_digits(wb['股票代码'][i])
-      first_industry = wb['新版一级行业'][i]
-      third_industry = wb['新版三级行业'][i]
-      code_class_dict[code] = third_industry
-      if third_industry not in thirdclass_code_dict:
-        thirdclass_code_dict[third_industry] = []
-      thirdclass_code_dict[third_industry].append(code)
-      
-      if first_industry not in firstclass_code_dict:
-        firstclass_code_dict[first_industry] = []
-      firstclass_code_dict[first_industry].append(code)
-      
-  return thirdclass_code_dict, code_class_dict, firstclass_code_dict
-
 def sectorRaiseSort(df_dict, class_dict, days ):
   '''
   sort raise of n days
@@ -75,7 +47,7 @@ def sectorRaiseSort(df_dict, class_dict, days ):
     
   
 def sectorTech(df_dict):
-  class_dict, _ , _= LoadSwClassDict()
+  class_dict, _ , _=  data_utils.LoadSwClassDict()
   sorted_class_dict_val, sorted_class_dict_code = sectorRaiseSort(df_dict, class_dict, 1)
   first_5_dict = dict(list(sorted_class_dict_val.items())[:5])
   first_5_dict_code = [sorted_class_dict_code[key] for key in first_5_dict]  
@@ -112,7 +84,5 @@ def test(df_dict):
 
 
 if __name__ == '__main__':
-  # df_dict = data_utils.LoadPickleData(pro_path+"/sec_data/daily.pickle")
-  res = industryLeaderSW()
-  print(res)
+  df_dict = data_utils.LoadPickleData(pro_path+"/sec_data/daily.pickle")
   
