@@ -128,8 +128,8 @@ def get_daily_raise_limit(close_data, code, thresh = 0.096):
   '''
   get daily raise limit idx
   ret:
-    daily_limit_idx: amp的索引
-    daily_limit_idx_revserse: amp的索引, 相对于最后一天的偏移
+    daily_limit_idx: amp的正向索引
+    daily_limit_idx_revserse: amp的反向索引, 相对于最后一天的偏移
     diff: amp, first is zero
   '''
   raise_limit = thresh

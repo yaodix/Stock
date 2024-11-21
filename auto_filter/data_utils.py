@@ -213,15 +213,21 @@ def DataIsUpdate(df_dict):
   else:
     first_df = next(iter(df_dict.values()))
     last_date = first_df['Date'].iloc[-1]
+      
     cur_date = dt.date.today().strftime("%Y%m%d")
-    cur_df = ak.stock_zh_a_hist(symbol="000001", period = 'daily', start_date=last_date,
+    cur_daily_df = ak.stock_zh_a_hist(symbol="000001", period = 'daily', start_date=last_date,
                                 end_date= cur_date, adjust= 'qfq')
-    if cur_df.empty:
+    cur_weekly_df = ak.stock_zh_a_hist(symbol="000001", period = 'weekly', start_date=last_date,
+                                end_date= cur_date, adjust= 'qfq')
+    if cur_daily_df.empty or cur_weekly_df.empty:
       return True
     
-    if cur_df['日期'].iloc[-1]== first_df['Date'].iloc[-1] and cur_df['收盘'].iloc[-1]== first_df['Close'].iloc[-1] and \
-        cur_df['最低'].iloc[-1]== first_df['Low'].iloc[-1] and cur_df['最高'].iloc[-1]== first_df['High'].iloc[-1]:
-       return True
+    if cur_daily_df['日期'].iloc[-1]== first_df['Date'].iloc[-1] and cur_daily_df['收盘'].iloc[-1]== first_df['Close'].iloc[-1] and \
+        cur_daily_df['最低'].iloc[-1]== first_df['Low'].iloc[-1] and cur_daily_df['最高'].iloc[-1]== first_df['High'].iloc[-1]:
+      return True
+    elif cur_weekly_df['日期'].iloc[-1]== first_df['Date'].iloc[-1] and cur_weekly_df['收盘'].iloc[-1]== first_df['Close'].iloc[-1] and \
+         cur_weekly_df['最低'].iloc[-1]== first_df['Low'].iloc[-1] and cur_weekly_df['最高'].iloc[-1]== first_df['High'].iloc[-1]:
+      return True
     else:
       return False
 

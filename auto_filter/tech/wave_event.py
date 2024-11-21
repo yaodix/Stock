@@ -54,6 +54,8 @@ def waveSupportImpl(df_one, raise_ratio, decade_ratio, straight_angle_thresh = 1
   last_lowest_pivot_price = np.asarray(price_1)[low_pivots_index[-1]]
   if last_price > 1.05 * last_lowest_pivot_price :
     return 0, 0, 0, 0
+  
+  
   # get support length
   valid_suport_start_idx = -1
   pivots_cnt = 1
@@ -156,8 +158,8 @@ def GetWaveSupportWeekly(df_dict, order_cnt = 10, show = False):
 test_map = {
   # "600855": ["20240911"],  #zhong chong gufen
   # "001965": ["20241127"],  
-  # "300522": ["20241127"],  
-  "603050": ["20240126"],  # 缠+突破
+  "601928": ["20241127"],  
+  # "603050": ["20240126"],  # 缠+突破
 
 }
 
@@ -180,8 +182,8 @@ if __name__ == '__main__':
       test_dict[key] = test_dict[key][test_dict[key]["Date"] <= end_day]
     
   # test_dict = df_dict_weekly
-  test_dict = df_dict_daily
-  hor20m, slope20 = GetWaveSupportDaily(test_dict, show=False)
+  # test_dict = df_dict_daily
+  hor20m, slope20 = GetWaveSupportDaily(test_dict, show=True)
   # hor20m, slope20 = GetWaveSupportWeekly(test_dict, show=False)
   print(f"hor {hor20m}\n")
   print(f"slope {slope20}")

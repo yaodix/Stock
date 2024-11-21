@@ -45,6 +45,11 @@ def filter_low_wave(src_data, pivots, security_code, verbose = False):
   if (high_pivots_index[-1] > low_pivots_index[-1]):
     return False
   
+  # 最新实时价格与最新低点价格对比
+  last_price = np.asarray(src_data["Close"])[-1]
+  last_lowest_pivot_price = np.asarray(src_data["Close"])[low_pivots_index[-1]]
+  if last_price > 1.05 * last_lowest_pivot_price or last_price < 0.95 * last_lowest_pivot_price :
+    return False  
   # 涨停数量不少于1个，不多于2个
   raise_last_start_low_idx = low_pivots_index[-2]
   raise_last_end_high_idx = high_pivots_index[-1]
@@ -124,7 +129,7 @@ def filter_high_wave(src_data, pivots, security_code, verbose = False):
   # 最新实时价格与最新低点价格对比
   last_price = np.asarray(src_data["Close"])[-1]
   last_lowest_pivot_price = np.asarray(src_data["Close"])[low_pivots_index[-1]]
-  if last_price > 1.05 * last_lowest_pivot_price :
+  if last_price > 1.05 * last_lowest_pivot_price or last_price < 0.95 * last_lowest_pivot_price:
     return False
   
   # 下降数量大于2
@@ -231,9 +236,10 @@ high_wave_dict = {
                  }
 
 low_wave_dict = {
-  "000826": ["20241104"],
-  "603787": ["20240408", "20240428"],
-  "603196": ["20240829"],   
+  # "000826": ["20241104"],
+  # "603787": ["20240408", "20240428"],
+  # "603196": ["20240829"],   
+  "000006": ["20241125"],   
 
 }
 

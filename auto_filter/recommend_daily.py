@@ -81,24 +81,24 @@ def dailyTechFilterAndPost():
     mail_cont.append(yagmail.inline(fig_name))
     
   mail_cont.append("daily_horizon ")
-  for code in tqdm(daily_horizon_dict.items()):
-    data_utils.show_stock_data_eastmoney(code, df_dict[code], save_dir= save_dir, predix="daily_horizon_", days=100*6)
+  for code, start_date in tqdm(daily_horizon_dict.items()):
+    data_utils.show_stock_data_eastmoney(code, df_dict[code], save_dir= save_dir, predix="daily_horizon_", days=150)
     fig_name = save_dir + "daily_horizon_" + code+".png"
     mail_cont.append(yagmail.inline(fig_name))  
   mail_cont.append("daily_slope ")
-  for code in tqdm(daily_slope_dict.items()):
-    data_utils.show_stock_data_eastmoney(code, df_dict[code], save_dir= save_dir, predix="daily_slope_", days=100*6)
+  for code, start_date in tqdm(daily_slope_dict.items()):
+    data_utils.show_stock_data_eastmoney(code, df_dict[code], save_dir= save_dir, predix="daily_slope_", days=150)
     fig_name = save_dir + "daily_slope_" + code+".png"
     mail_cont.append(yagmail.inline(fig_name))
     
   mail_cont.append("weekly_horizon ")
-  for code in tqdm(weekly_horizon_dict.items()):
+  for code, start_date in tqdm(weekly_horizon_dict.items()):
     data_utils.show_stock_data_eastmoney(code, weekly_df_dict[code], save_dir= save_dir, predix="weekly_horizon_", days=100*6)
     fig_name = save_dir + "weekly_horizon_" + code+".png"
     mail_cont.append(yagmail.inline(fig_name))
     
   mail_cont.append("weekly_slope ")
-  for code in tqdm(weekly_slope_dict.items()):
+  for code, start_date in tqdm(weekly_slope_dict.items()):
     data_utils.show_stock_data_eastmoney(code, weekly_df_dict[code], save_dir= save_dir, predix="weekly_slope_", days=100*6)
     fig_name = save_dir + "weekly_slope_" + code+".png"
     mail_cont.append(yagmail.inline(fig_name))

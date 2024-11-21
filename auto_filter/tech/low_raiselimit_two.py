@@ -57,6 +57,12 @@ def raiseLimitTwoImpl(df_daily, code, idx_reverse):
   if np.any((sum_two) < -0.1):
     return False
   
+  # 第一次涨停前，涨幅不能太大
+  price_before_first_raiselimit1 = close_price[daily_limit_idx[0]-1]
+  price_before_first_rasislimit5 = close_price[daily_limit_idx[0]-5]
+  if abs(price_before_first_rasislimit5 - price_before_first_raiselimit1) / price_before_first_rasislimit5 > raise_limit*1.8:
+    return False
+
   # 涨停后有价格低于涨停前一天价格,
   # if np.any(close_price[daily_limit_idx[-1]+1:] < close_price[daily_limit_idx[-1]-1]):
   #   return False
@@ -110,5 +116,6 @@ if __name__ == "__main__":
       end_day = dt.datetime.date(dt.datetime.strptime(date, "%Y%m%d"))
       test_dict[key] = test_dict[key][test_dict[key]["Date"] <= end_day]
     
-      res_dict = raiseLimitTwo(test_dict)
+  test_dict = df_dict
+  res_dict = raiseLimitTwo(test_dict)
   print(res_dict)
