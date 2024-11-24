@@ -97,7 +97,7 @@ def mergeWave(wave_in):
   return wave_m3
     
   
-def getAllWave(df_one, raise_ratio, decade_ratio, show = False):
+def getAllWave(df_one, show = False):
   '''
   '''
   include_cnt = 180
@@ -273,6 +273,6 @@ if __name__ == '__main__':
   test_dict = df_dict_daily
   # hor20m, slope20 = GetWaveSupportDaily(test_dict, show=True)
   # hor20m, slope20 = GetWaveSupportWeekly(test_dict, show=False)
-  getAllWave(test_dict["603444"], 0.103, 0.09)
+  getAllWave(test_dict["603444"],)
   # print(f"hor {hor20m}\n")
   # print(f"slope {slope20}")

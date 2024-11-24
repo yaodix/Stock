@@ -11,6 +11,14 @@ import pickle
 import mplfinance as mpf
 import matplotlib.pyplot as plt
 import cv2
+cur_file = os.path.abspath(__file__)
+start_index = cur_file.find("auto_filter")
+pro_path = cur_file[:start_index+11]
+sys.path.append(pro_path)
+
+import tech.tech_base as tech_base
+import data_utils
+import utils
 
 cur_file = os.path.abspath(__file__)
 start_index = cur_file.find("auto_filter")
@@ -29,50 +37,47 @@ def angelThreePoint(p_center, p1, p2):
 
   return np.degrees(angle)
 
-def waveSupportImpl(df_one, raise_ratio, decade_ratio, straight_angle_thresh = 165, show = False):
+def waveSupportImpl(df_one, pivots, show = False):
   '''
   '''
-  price_1 = np.array(df_one["Close"])[-180:]
-  dateProcess = np.array(df_one["Date"])[-180:]
-  pivots = tech_base.get_pivots(price_1, 0.103, 0.09)
-  if show:
-    data_utils.plot_pivots(price_1, pivots)
-    data_utils.plot_pivot_line(price_1, pivots)
-    plt.show()
+  price_1 = np.array(df_one["Close"])
   low_pivots_index = [k for k, v in pivots.items() if v == -1]
   high_pivots_index = [k for k, v in pivots.items() if v == 1]
   if (len(low_pivots_index) < 3):
-    return 0, 0, 0, 0
+    return False, 0
   if (len(high_pivots_index) < 2):
-    return 0, 0, 0, 0
+    return False, 0
   
   # 波谷在波峰前面，否则退出
   if (high_pivots_index[-1] > low_pivots_index[-1]):
-    return 0, 0, 0, 0
+    return False, 0
   
   last_price = np.asarray(price_1)[-1]
   last_lowest_pivot_price = np.asarray(price_1)[low_pivots_index[-1]]
   if last_price > 1.05 * last_lowest_pivot_price :
-    return 0, 0, 0, 0
+    return False, 0
   
   
   # get support length
-  valid_suport_start_idx = -1
-  pivots_cnt = 1
-  for i in range(len(low_pivots_index)-2, 0, -1):
-    angle = angelThreePoint(np.array([i,   price_1[low_pivots_index[i]]]),
-                            np.array([i+1, price_1[low_pivots_index[i+1]]]),
-                            np.array([i-1, price_1[low_pivots_index[i-1]]]))
-    if angle > straight_angle_thresh:
-      valid_suport_start_idx = i-1
-      pivots_cnt +=1
-    else:
-      break  
+  thirdlatest_low_pivot_index = low_pivots_index[-3]
+  secondlatest_low_pivot_index = low_pivots_index[-2]
+  latest_low_pivot_index = low_pivots_index[-1]
+  thirdlatest_low_pivot_price = np.asarray(price_1)[thirdlatest_low_pivot_index]
+  secondlatest_low_pivot_price = np.asarray(price_1)[secondlatest_low_pivot_index]
+  latest_low_pivot_price = np.asarray(price_1)[latest_low_pivot_index]
+  if (thirdlatest_low_pivot_price - secondlatest_low_pivot_price) / thirdlatest_low_pivot_price > 0.0 or \
+     (secondlatest_low_pivot_price - latest_low_pivot_price) / secondlatest_low_pivot_price > 0.03:
+    return False, 0
   
-  start_date = dateProcess[low_pivots_index[valid_suport_start_idx]]
-  mid_date = dateProcess[low_pivots_index[int((valid_suport_start_idx+len(low_pivots_index))/2)]]
+  #fit line
+  support_price = np.array([thirdlatest_low_pivot_price, secondlatest_low_pivot_price, latest_low_pivot_price])
+  mean_support_price = np.mean(support_price)
+  diff_sum = abs(thirdlatest_low_pivot_price-mean_support_price)/ thirdlatest_low_pivot_price + \
+             abs(secondlatest_low_pivot_price-mean_support_price)/ secondlatest_low_pivot_price + \
+             abs(latest_low_pivot_price-mean_support_price)/ latest_low_pivot_price
+
   
-  return len(price_1) - low_pivots_index[valid_suport_start_idx], start_date, mid_date, pivots_cnt
+  return  True, diff_sum
   
 def angleRefHorizonRatio(code_value, start_date, mid_date):
     start_index = [i for i, date in enumerate(code_value["Date"]) if date == start_date]
@@ -102,31 +107,26 @@ param_config = {
     "decade_ratio": 0.11
   }
 }
-def GetWaveSupportDaily(df_dict, order_cnt = 10, show = False):
+def GetWaveSupportDaily(df_dict, order_cnt = 40, show = False):
   slope_dict = {}
   horizon_dict = {}
   pivots_cnt_dict = {}
-  for code, value in df_dict.items():
-    len, start_date, mid_date, pivots_cnt = waveSupportImpl(value, param_config["daily"]["raise_ratio"], param_config["daily"]["decade_ratio"],show=show)
-    if len > 10:
-      angle, ratio= angleRefHorizonRatio(value, start_date, mid_date)
-      if angle < 5 and ratio < 0.1:
-        horizon_dict[code] = len
-        pivots_cnt_dict[code] = pivots_cnt
-      else:
-        slope_dict[code] = len      
-        pivots_cnt_dict[code] = pivots_cnt
-  
-  hor_sort_dict =  dict(sorted(horizon_dict.items(), key=lambda x: x[1], reverse=True))
+  code_list = []
+
+  print("daily wave support")
+  for code, value in tqdm(df_dict.items()):
+    pivots = tech_base.get_pivots(value["Close"],  param_config["daily"]["raise_ratio"], param_config["daily"]["decade_ratio"])
+    sel, diff_ratio = waveSupportImpl(value, pivots, show=show)
+    if sel:
+      horizon_dict[code] = diff_ratio
+      # data_utils.plot_pivots(value["Close"], pivots)
+      # data_utils.plot_pivot_line(value["Close"], pivots)
+      # plt.show()
+
+  hor_sort_dict =  dict(sorted(horizon_dict.items(), key=lambda x: x[1], reverse=False))
   hor_sort_dict_20 = dict(list(hor_sort_dict.items())[:order_cnt])
-  hor_sort_dict_20 = dict(sorted(hor_sort_dict_20.items(), key=lambda x: pivots_cnt_dict[x[0]]))
   
-  slope_sort_dict =  dict(sorted(slope_dict.items(), key=lambda x: x[1], reverse=True))
-  slope_sort_dict_20 = dict(list(slope_sort_dict.items())[:order_cnt])
-  slope_sort_dict_20 = dict(sorted(slope_sort_dict_20.items(), key=lambda x: pivots_cnt_dict[x[0]]))
-  
-  
-  return hor_sort_dict_20, slope_sort_dict_20
+  return hor_sort_dict_20
 
 def GetWaveSupportWeekly(df_dict, order_cnt = 10, show = False):
   slope_dict = {}
@@ -166,7 +166,6 @@ test_map = {
 def test():
   pass
 
-
 if __name__ == '__main__':
   df_dict_daily = data_utils.LoadPickleData(pro_path+"/sec_data/daily.pickle")
   df_dict_weekly = data_utils.LoadPickleData(pro_path+"/sec_data/weekly.pickle")
@@ -182,8 +181,17 @@ if __name__ == '__main__':
       test_dict[key] = test_dict[key][test_dict[key]["Date"] <= end_day]
     
   # test_dict = df_dict_weekly
-  # test_dict = df_dict_daily
-  hor20m, slope20 = GetWaveSupportDaily(test_dict, show=True)
+  test_dict = df_dict_daily
+  hor20m = GetWaveSupportDaily(test_dict, show=False)
   # hor20m, slope20 = GetWaveSupportWeekly(test_dict, show=False)
+  save_dir = utils.getProjectPath("auto_filter")+ "/workdata/"
+
+  print(f"save pic hor {hor20m}\n")
+  cnt = 0
+  for code, ss in tqdm(hor20m.items()):
+    cnt += 1
+    df = test_dict[code]
+    data_utils.show_stock_data_eastmoney(code, test_dict[code], save_dir= save_dir, predix="daily_hor_"+f"{cnt:03}_", days=150)
+
   print(f"hor {hor20m}\n")
-  print(f"slope {slope20}")
+  # print(f"slope {slope20}")

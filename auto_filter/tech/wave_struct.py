@@ -20,10 +20,6 @@ sys.path.append(pro_path)
 import tech.tech_base as tech_base
 import data_utils
 
-def shiftWaveStructure(df_one, pivots):
-  '''
-  修复波形的起点和终点
-  '''
 
 def waveStructureImplPivot(df_one):
   '''
