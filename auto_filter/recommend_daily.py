@@ -42,22 +42,22 @@ def dailyTechFilterAndPost():
   # print(f"wave_low_dcit size {wave_low_dcit.__len__()} {wave_low_dcit.keys()}")
   # print(f"wave_high_dict {wave_high_dict.__len__()} {wave_high_dict.keys()}")
   
-  daily_horizon_dict, daily_slope_dict = GetWaveSupportDaily(df_dict, show=False)
+  daily_horizon_dict, daily_slope_dict = GetWaveSupportDaily(df_dict,order_cnt=15 ,show=False)
   print(f"daily_horizon_dict {daily_horizon_dict.__len__()} {daily_horizon_dict.keys()}")
   print(f"daily_slope_dict {daily_slope_dict.__len__()} {daily_slope_dict.keys()}")
 
   weekly_df_dict = data_utils.updateToLatestDay(weekly_pickle_path, "weekly", 2)
-  weekly_horizon_dict, weekly_slope_dict = GetWaveSupportWeekly(weekly_df_dict)
+  weekly_horizon_dict, weekly_slope_dict = GetWaveSupportWeekly(weekly_df_dict, order_cnt=15, show=False)
   print(f"weekly_horizon_dict {weekly_horizon_dict.__len__()} {weekly_horizon_dict}")
   print(f"weekly_slope_dict {weekly_slope_dict.__len__()} {weekly_slope_dict}")
   # save pic
-  mail_cont = ["two raise limit in bottom",]
   print(f"save pic")
   save_dir = utils.getProjectPath("auto_filter")+ "/workdata/"
   for file in os.listdir(save_dir):
     if file.endswith('.png'):
       os.remove(save_dir+file)
 
+  mail_cont = ["tech!",]
   # for code, data_idx in tqdm(code_dict.items()):
   #   data_utils.show_stock_data_eastmoney(code, df_dict[code], save_dir= save_dir, predix="tr_")
   #   fig_name = save_dir+"tr_" + code+".png"
@@ -107,7 +107,7 @@ def dailyTechFilterAndPost():
     mail_cont.append(yagmail.inline(fig_name))
   
   # post to mail
-  # yag.send(mail_send_list, 'subject', mail_cont)
+  yag.send(mail_send_list, 'subject', mail_cont)
 
   return
 
