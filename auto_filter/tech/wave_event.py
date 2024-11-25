@@ -59,7 +59,7 @@ def angelThreePoint(p_center, p1, p2):
 
   return np.degrees(angle)
 
-def waveSupportHorImpl(df_one, pivots, show = False):
+def waveSupportHorImpl(df_one, pivots, last_price_ratio,  hor_diff_ratio, show = False):
   '''
   '''
   price_1 = np.array(df_one["Close"])
@@ -76,7 +76,7 @@ def waveSupportHorImpl(df_one, pivots, show = False):
   
   last_price = np.asarray(price_1)[-1]
   last_lowest_pivot_price = np.asarray(price_1)[low_pivots_index[-1]]
-  if last_price > 1.05 * last_lowest_pivot_price :
+  if last_price > last_price_ratio * last_lowest_pivot_price :
     return False, 0
   
   
@@ -87,8 +87,8 @@ def waveSupportHorImpl(df_one, pivots, show = False):
   thirdlatest_low_pivot_price = np.asarray(price_1)[thirdlatest_low_pivot_index]
   secondlatest_low_pivot_price = np.asarray(price_1)[secondlatest_low_pivot_index]
   latest_low_pivot_price = np.asarray(price_1)[latest_low_pivot_index]
-  if (thirdlatest_low_pivot_price - secondlatest_low_pivot_price) / thirdlatest_low_pivot_price > 0.0 or \
-     (secondlatest_low_pivot_price - latest_low_pivot_price) / secondlatest_low_pivot_price > 0.03:
+  if (thirdlatest_low_pivot_price - secondlatest_low_pivot_price) / thirdlatest_low_pivot_price > hor_diff_ratio or \
+     (secondlatest_low_pivot_price - latest_low_pivot_price) / secondlatest_low_pivot_price > hor_diff_ratio:
     return False, 0
   
   #hor line
@@ -102,7 +102,7 @@ def waveSupportHorImpl(df_one, pivots, show = False):
   
   return  True, diff_sum
   
-def waveSupporSlopeImpl(df_one, pivots, show = False):
+def waveSupportSlopeImpl(df_one, pivots,last_price_ratio, slope_ratio, show = False):
   '''
   '''
   price_1 = np.array(df_one["Close"])
@@ -119,7 +119,7 @@ def waveSupporSlopeImpl(df_one, pivots, show = False):
   
   last_price = np.asarray(price_1)[-1]
   last_lowest_pivot_price = np.asarray(price_1)[low_pivots_index[-1]]
-  if last_price > 1.05 * last_lowest_pivot_price :
+  if last_price > last_price_ratio * last_lowest_pivot_price :
     return False, 0
   
   
@@ -133,7 +133,7 @@ def waveSupporSlopeImpl(df_one, pivots, show = False):
   if (thirdlatest_low_pivot_price > secondlatest_low_pivot_price)  or \
      (secondlatest_low_pivot_price > latest_low_pivot_price):
     return False, 0
-  if abs(thirdlatest_low_pivot_price - latest_low_pivot_price) / thirdlatest_low_pivot_price > 0.14:
+  if abs(thirdlatest_low_pivot_price - latest_low_pivot_price) / thirdlatest_low_pivot_price > slope_ratio:
     return False, 0
 
   #slope line, fit
@@ -159,6 +159,19 @@ def waveSupporSlopeImpl(df_one, pivots, show = False):
   return True, diff_sum
 
 param_config = {
+  "last_price_ratio":
+  {
+    "daily": 1.05,
+    "weekly": 1.08
+  },
+  "hor_diff_ratio": {
+    "daily": 0.03,
+    "weekly": 0.05
+  },
+  "slope_ratio": {
+    "daily": 0.14,
+    "weekly": 0.2
+  },
   "daily": {
     "raise_ratio": 0.103,
     "decade_ratio": 0.09
@@ -176,9 +189,9 @@ def GetWaveSupportDaily(df_dict, order_cnt = 20, show = False):
 
   print("daily wave support")
   for code, value in tqdm(df_dict.items()):
-    pivots = tech_base.get_pivots(value["Close"],  param_config["daily"]["raise_ratio"], param_config["daily"]["decade_ratio"])
-    sel_h, diff_ratio = waveSupportHorImpl(value, pivots, show=show)
-    sel_s, s_ratio = waveSupporSlopeImpl(value, pivots, show=show)
+    pivots = tech_base.get_pivots(value["Close"], param_config["daily"]["raise_ratio"], param_config["daily"]["decade_ratio"])
+    sel_h, diff_ratio = waveSupportHorImpl(value, pivots, param_config["last_price_ratio"]["daily"], param_config["hor_diff_ratio"]["daily"],show=show)
+    sel_s, s_ratio = waveSupportSlopeImpl(value, pivots, param_config["last_price_ratio"]["daily"], param_config["slope_ratio"]["daily"], show=show)
     if sel_h:
       horizon_dict[code] = diff_ratio
       # data_utils.plot_pivots(value["Close"], pivots)
@@ -198,31 +211,32 @@ def GetWaveSupportDaily(df_dict, order_cnt = 20, show = False):
   
   return hor_sort_dict_20, slope_sort_dict_20
 
-# def GetWaveSupportWeekly(df_dict, order_cnt = 10, show = False):
-#   slope_dict = {}
-#   horizon_dict = {}
-#   pivots_cnt_dict = {}
-#   for code, value in df_dict.items():
-#     len, start_date, mid_date, pivots_cnt = waveSupportImpl(value, param_config["weekly"]["raise_ratio"], param_config["weekly"]["decade_ratio"],show=show)
-#     if len > 10:
-#       angle, ratio= angleRefHorizonRatio(value, start_date, mid_date)
-#       if angle < 5 and ratio < 0.1:
-#         horizon_dict[code] = len
-#         pivots_cnt_dict[code] = pivots_cnt
-#       else:
-#         slope_dict[code] = len      
-#         pivots_cnt_dict[code] = pivots_cnt
+def GetWaveSupportWeekly(df_dict, order_cnt = 10, show = False):
+  slope_dict = {}
+  horizon_dict = {}
+  for code, value in df_dict.items():
+    pivots = tech_base.get_pivots(value["Close"],  param_config["weekly"]["raise_ratio"], param_config["weekly"]["decade_ratio"])
+    sel_h, diff_ratio = waveSupportHorImpl(value, pivots, param_config["last_price_ratio"]["weekly"], param_config["hor_diff_ratio"]["weekly"],show=show)
+    sel_s, s_ratio = waveSupportSlopeImpl(value, pivots, param_config["last_price_ratio"]["weekly"], param_config["slope_ratio"]["weekly"], show=show)
+    
+    if sel_h:
+      horizon_dict[code] = diff_ratio
+      # data_utils.plot_pivots(value["Close"], pivots)
+      # data_utils.plot_pivot_line(value["Close"], pivots)
+      # plt.show()
+    if sel_s:
+      slope_dict[code] = s_ratio
+      # data_utils.plot_pivots(value["Close"], pivots)
+      # data_utils.plot_pivot_line(value["Close"], pivots)
+      # plt.show()
+
+  hor_sort_dict =  dict(sorted(horizon_dict.items(), key=lambda x: x[1], reverse=False))
+  hor_sort_dict_20 = dict(list(hor_sort_dict.items())[:order_cnt])
+
+  slope_sort_dict =  dict(sorted(slope_dict.items(), key=lambda x: x[1], reverse=False))
+  slope_sort_dict_20 = dict(list(slope_sort_dict.items())[:order_cnt])
   
-#   hor_sort_dict =  dict(sorted(horizon_dict.items(), key=lambda x: x[1], reverse=True))
-#   hor_sort_dict_20 = dict(list(hor_sort_dict.items())[:order_cnt])
-#   hor_sort_dict_20 = dict(sorted(hor_sort_dict_20.items(), key=lambda x: pivots_cnt_dict[x[0]]))
-  
-#   slope_sort_dict =  dict(sorted(slope_dict.items(), key=lambda x: x[1], reverse=True))
-#   slope_sort_dict_20 = dict(list(slope_sort_dict.items())[:order_cnt])
-#   slope_sort_dict_20 = dict(sorted(slope_sort_dict_20.items(), key=lambda x: pivots_cnt_dict[x[0]]))
-  
-  
-#   return hor_sort_dict_20, slope_sort_dict_20
+  return hor_sort_dict_20, slope_sort_dict_20
 
 
 test_map = {

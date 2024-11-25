@@ -86,20 +86,6 @@ def waveStructureImplPivot(df_one):
   return False
   
   
-def waveStructureImplApprox(df_one):
-  price_1 = np.array(df_one["Close"])[-100:]
-  price_list = []
-  for i in range(1, len(price_1)):
-    price_list.append([i, price_1[i]])
-  price_list = np.array(price_list, dtype=np.float32)
-
-  approx = cv2.approxPolyDP(price_list, 0.6, True)
-  approx = approx.reshape((-1, 2))
-  plt.plot(price_1)
-  # plt.plot(approx, 'r--')
-  # plt.scatter(approx[:, 0], approx[:, 1], c='r', marker='o')
-  # plt.show()
-  pass
 def GetWaveStructureWeekly(df_dict):
   res_list = []
   for code, value in df_dict.items():
