@@ -394,5 +394,5 @@ if __name__ == '__main__':
   # test_getA500AndLeader()
 
   updateToLatestDay(daily_path, 'daily', 1)
-  updateToLatestDay(weekly_path, 'weekly', 2)
+  updateToLatestDay(weekly_path, 'weekly', 5)
   # updateToLatestDay(monthly_path, 'monthly', 1)

@@ -17,7 +17,7 @@ import data_utils
 from tech.low_raiselimit_two import raiseLimitTwo
 from tech.wave_raise import waveTechFilter
 from tech.wave_struct import GetWaveStructureWeekly
-from tech.wave_event import GetWaveSupportDaily, GetWaveSupportWeekly
+from tech.wave_event import GetWaveSupportDaily, GetWaveSupportWeekly, plotHorSupport, plotSlopeSupport
 import warnings
 warnings.filterwarnings("ignore")
 
@@ -41,13 +41,13 @@ def dailyTechFilterAndPost():
   # wave_low_dcit, wave_high_dict = waveTechFilter(df_dict,enable_high=True)
   # print(f"wave_low_dcit size {wave_low_dcit.__len__()} {wave_low_dcit.keys()}")
   # print(f"wave_high_dict {wave_high_dict.__len__()} {wave_high_dict.keys()}")
-  
-  daily_horizon_dict, daily_slope_dict = GetWaveSupportDaily(df_dict,order_cnt=15 ,show=False)
+  daily_horizon_dict, support_price_dict, daily_slope_dict, slope_support = GetWaveSupportDaily(df_dict, show=False)
+
   print(f"daily_horizon_dict {daily_horizon_dict.__len__()} {daily_horizon_dict.keys()}")
   print(f"daily_slope_dict {daily_slope_dict.__len__()} {daily_slope_dict.keys()}")
 
-  weekly_df_dict = data_utils.updateToLatestDay(weekly_pickle_path, "weekly", 2)
-  weekly_horizon_dict, weekly_slope_dict = GetWaveSupportWeekly(weekly_df_dict, order_cnt=15, show=False)
+  weekly_df_dict = data_utils.updateToLatestDay(weekly_pickle_path, "weekly", 5)
+  weekly_horizon_dict, wsupport_price_dict, weekly_slope_dict, wslope_support = GetWaveSupportWeekly(weekly_df_dict, show=False)
   print(f"weekly_horizon_dict {weekly_horizon_dict.__len__()} {weekly_horizon_dict}")
   print(f"weekly_slope_dict {weekly_slope_dict.__len__()} {weekly_slope_dict}")
   # save pic
@@ -84,21 +84,27 @@ def dailyTechFilterAndPost():
   print(f"****slope common_keys {commonKeys(daily_slope_dict, weekly_slope_dict)}")
     
   mail_cont.append("daily_horizon ")
-  for code, start_date in tqdm(daily_horizon_dict.items()):
+  for i, (code, start_date) in tqdm(enumerate(daily_horizon_dict.items())):
+    plt.subplot(2,1,1)
     data_utils.show_stock_data_eastmoney(code, df_dict[code], save_dir= save_dir, predix="daily_horizon_", days=150)
+    plt.subplot(2,1,2)
+    plotHorSupport(code, df_dict[code], support_price_dict, save_dir, "daily", i)
+    # plt.show()
+    
     fig_name = save_dir + "daily_horizon_" + code+".png"
     mail_cont.append(yagmail.inline(fig_name))  
-  mail_cont.append("daily_slope ")
-  for code, start_date in tqdm(daily_slope_dict.items()):
-    data_utils.show_stock_data_eastmoney(code, df_dict[code], save_dir= save_dir, predix="daily_slope_", days=150)
-    fig_name = save_dir + "daily_slope_" + code+".png"
-    mail_cont.append(yagmail.inline(fig_name))
     
   mail_cont.append("weekly_horizon ")
   for code, start_date in tqdm(weekly_horizon_dict.items()):
     data_utils.show_stock_data_eastmoney(code, weekly_df_dict[code], save_dir= save_dir, predix="weekly_horizon_", days=100*6)
     fig_name = save_dir + "weekly_horizon_" + code+".png"
     mail_cont.append(yagmail.inline(fig_name))
+    
+  mail_cont.append("daily_slope ")
+  for code, start_date in tqdm(daily_slope_dict.items()):
+    data_utils.show_stock_data_eastmoney(code, df_dict[code], save_dir= save_dir, predix="daily_slope_", days=150)
+    fig_name = save_dir + "daily_slope_" + code+".png"
+    mail_cont.append(yagmail.inline(fig_name))    
     
   mail_cont.append("weekly_slope ")
   for code, start_date in tqdm(weekly_slope_dict.items()):
