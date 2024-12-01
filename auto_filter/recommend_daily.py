@@ -35,12 +35,12 @@ monthly_pickle_path = "./sec_data/monthly.pickle"
 
 def dailyTechFilterAndPost():
   df_dict = data_utils.updateToLatestDay(daily_pickle_path, "daily", 1)
-  # code_dict = raiseLimitTwo(df_dict)
-  # print(f"raiseLimitTwo size {code_dict.__len__()} {code_dict.keys()}")
+  code_dict = raiseLimitTwo(df_dict)
+  print(f"raiseLimitTwo size {code_dict.__len__()} {code_dict.keys()}")
 
-  # wave_low_dcit, wave_high_dict = waveTechFilter(df_dict,enable_high=True)
+  wave_low_dcit, wave_high_dict = waveTechFilter(df_dict,enable_high=True)
   # print(f"wave_low_dcit size {wave_low_dcit.__len__()} {wave_low_dcit.keys()}")
-  # print(f"wave_high_dict {wave_high_dict.__len__()} {wave_high_dict.keys()}")
+  print(f"wave_high_dict {wave_high_dict.__len__()} {wave_high_dict.keys()}")
   daily_horizon_dict, support_price_dict, daily_slope_dict, slope_support = GetWaveSupportDaily(df_dict, show=False)
 
   print(f"daily_horizon_dict {daily_horizon_dict.__len__()} {daily_horizon_dict.keys()}")
@@ -58,10 +58,10 @@ def dailyTechFilterAndPost():
       os.remove(save_dir+file)
 
   mail_cont = ["tech!",]
-  # for code, data_idx in tqdm(code_dict.items()):
-  #   data_utils.show_stock_data_eastmoney(code, df_dict[code], save_dir= save_dir, predix="tr_")
-  #   fig_name = save_dir+"tr_" + code+".png"
-  #   mail_cont.append(yagmail.inline(fig_name))
+  for code, data_idx in tqdm(code_dict.items()):
+    data_utils.show_stock_data_eastmoney(code, df_dict[code], save_dir= save_dir, predix="tr_")
+    fig_name = save_dir+"tr_" + code+".png"
+    mail_cont.append(yagmail.inline(fig_name))
 
   # mail_cont.append("wave-small wave")
   # for code, pivots in tqdm(wave_low_dcit.items()):
@@ -69,11 +69,11 @@ def dailyTechFilterAndPost():
   #   fig_name = save_dir +"wl_"+ code+".png"
   #   mail_cont.append(yagmail.inline(fig_name))
 
-  # mail_cont.append("wave-big wave")
-  # for code, pivots in tqdm(wave_high_dict.items()):
-  #   data_utils.show_stock_data_eastmoney(code, df_dict[code], save_dir= save_dir, predix="wh_")
-  #   fig_name = save_dir + "wh_" + code+".png"
-  #   mail_cont.append(yagmail.inline(fig_name))
+  mail_cont.append("wave-big wave")
+  for code, pivots in tqdm(wave_high_dict.items()):
+    data_utils.show_stock_data_eastmoney(code, df_dict[code], save_dir= save_dir, predix="wh_")
+    fig_name = save_dir + "wh_" + code+".png"
+    mail_cont.append(yagmail.inline(fig_name))
 
   # mail_cont.append("weekly_wave ")
   # for code in tqdm(weekly_wave_res):
