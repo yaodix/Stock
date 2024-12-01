@@ -221,7 +221,7 @@ param_config = {
   },
   "daily": {
     "raise_ratio": 0.103,
-    "decade_ratio": 0.09
+    "decade_ratio": 0.08
   },
   "weekly": {
     "raise_ratio": 0.15,
@@ -243,10 +243,10 @@ def GetWaveSupportDaily(df_dict, order_cnt = 15, show = False):
                                                        param_config["hor_diff_ratio"]["daily"], param_config["high_pivot_price_diff"]["daily"] ,show=show)
     sel_s, s_ratio, slope_mean_raise, support_line = waveSupportSlopeImpl(value, pivots, param_config["last_price_ratio"]["daily"], 
                                                       param_config["slope_ratio"]["daily"],param_config["high_pivot_price_diff"]["daily"], show=show)
-    if sel_h and diff_ratio < 0.05:
+    if sel_h and diff_ratio < 0.03:
       horizon_dict[code] = mean_raise
       hor_support_price_dict[code] = support_price
-    if sel_s and s_ratio < 0.05:
+    if sel_s and s_ratio < 0.035:
       slope_dict[code] = slope_mean_raise
       slope_support[code] = support_line
     if show:
@@ -278,10 +278,10 @@ def GetWaveSupportWeekly(df_dict, order_cnt = 15, show = False):
     sel_s, s_ratio, slope_mean_raise, support_line = waveSupportSlopeImpl(value, pivots, param_config["last_price_ratio"]["weekly"], param_config["slope_ratio"]["weekly"],\
                                                                       param_config["high_pivot_price_diff"]["weekly"], show=show)
     
-    if sel_h and diff_ratio < 0.08:
+    if sel_h and diff_ratio < 0.06:
       horizon_dict[code] = mean_raise
       hor_support_price_dict[code] = support_price
-    if sel_s and s_ratio < 0.08:
+    if sel_s and s_ratio < 0.065:
       slope_dict[code] = slope_mean_raise
       slope_support[code] = support_line
     if show:
@@ -301,7 +301,7 @@ def GetWaveSupportWeekly(df_dict, order_cnt = 15, show = False):
 test_map = {
   # "600855": ["20240911"],  #zhong chong gufen
   # "001965": ["20241127"],  
-  "601928": ["20241127"],  
+  "002722": ["20241129"],  
   # "603050": ["20240126"],  # 缠+突破
 
 }
@@ -353,7 +353,7 @@ if __name__ == '__main__':
       test_dict[key] = test_dict[key][test_dict[key]["Date"] <= end_day]
     
   # test_dict = df_dict_weekly
-  test_dict = df_dict_daily
+  # test_dict = df_dict_daily
   hor20m, support_price_dict, slope20, slope_support = GetWaveSupportDaily(test_dict, show=False)
   whor20m, wsupport_price_dict, wslope20, wslope_support = GetWaveSupportWeekly(test_dict, show=False)
   save_dir = utils.getProjectPath("auto_filter")+ "/workdata/"

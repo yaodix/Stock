@@ -113,7 +113,7 @@ def dailyTechFilterAndPost():
     mail_cont.append(yagmail.inline(fig_name))
   
   # post to mail
-  yag.send(mail_send_list, 'subject', mail_cont)
+  # yag.send(mail_send_list, 'subject', mail_cont)
 
   return
 

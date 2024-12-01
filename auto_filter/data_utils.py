@@ -19,7 +19,20 @@ def keep_only_digits(s):
     # 使用正则表达式匹配字符串中的所有数字
     digits_only = re.sub(r'\D', '', s)
     return digits_only
-  
+def is_same_week(date1, date2):
+    """
+    判断两个日期是否在同一周
+
+    参数:
+        date1 (date): 第一个日期
+        date2 (date): 第二个日期
+
+    返回:
+        bool: 如果两个日期在同一周，返回True；否则返回False
+    """
+    year1, week1, _ = date1.isocalendar()
+    year2, week2, _ = date2.isocalendar()
+    return (year1, week1) == (year2, week2)
 
 def GetSecurityCode():
   '''
@@ -297,7 +310,9 @@ def show_stock_data_eastmoney(code, df_one, start_date="", end_date="", vline_da
 
   # 定义 mplfinance 的自定义风格
   mc = mpf.make_marketcolors(up='r', down='g', volume='inherit')
-  s = mpf.make_mpf_style(base_mpf_style='charles', marketcolors=mc) # 
+  s = mpf.make_mpf_style(base_mpf_style='charles',\
+                         rc={'font.family': 'SimHei', 'axes.unicode_minus': 'False'},\
+                        marketcolors=mc) # 
 
   # 使用 mplfinance 绘制 K 线图，并应用自定义风格
   fig_name = save_dir + predix+ code+".png"
@@ -313,6 +328,7 @@ def show_stock_data_eastmoney(code, df_one, start_date="", end_date="", vline_da
        )
   
   # mpf.show()
+
 def outputFileInfo(df_dict):
   '''
   输出000001 最后1行数据
@@ -369,8 +385,12 @@ def updateToLatestDay(pickle_file, period_unit, years):
           '涨跌额': 'ChangeAmount',
           '换手率': 'TurnoverRate'
           },inplace=True)
-        if df['Date'].iloc[-1]== add_df['Date'].iloc[0]:
+        
+        if period_unit == "daily" and df['Date'].iloc[-1]== add_df['Date'].iloc[0]:
           df.drop(df.index[-1], inplace=True)
+        if period_unit == "weekly" and is_same_week(df['Date'].iloc[-1], add_df['Date'].iloc[0]):
+          df.drop(df.index[-1], inplace=True)
+
         df = pd.concat([df, add_df], ignore_index=True)
         df_dict[code] = df
       # break
@@ -393,6 +413,24 @@ if __name__ == '__main__':
   daily_path = './sec_data/daily.pickle'
   # test_getA500AndLeader()
 
-  updateToLatestDay(daily_path, 'daily', 1)
-  updateToLatestDay(weekly_path, 'weekly', 5)
+  df_day = updateToLatestDay(daily_path, 'daily', 1)
+  # df_w = updateToLatestDay(weekly_path, 'weekly', 5)
   # updateToLatestDay(monthly_path, 'monthly', 1)
+  # show_stock_data_eastmoney("000001", df["000001"])
+  df = df_day["000001"]
+  df['Date'] = pd.to_datetime(df['Date'])
+
+  df.set_index('Date', inplace=True)
+  fig = mpf.figure(figsize=(12,9))
+  ax1 = fig.add_subplot(2,2,1,style='blueskies')
+  ax2 = fig.add_subplot(2,2,2,style='yahoo')
+  
+  s = mpf.make_mpf_style(base_mpl_style='fast',base_mpf_style='nightclouds')
+  ax3 = fig.add_subplot(2,2,3,style=s)
+  ax4 = fig.add_subplot(2,2,4,style='starsandstripes')
+  
+  mpf.plot(df,ax=ax1,axtitle='blueskies',xrotation=15)
+  mpf.plot(df,type='candle',ax=ax2,axtitle='yahoo',xrotation=15)
+  mpf.plot(df,ax=ax3,type='candle',axtitle='nightclouds')
+  mpf.plot(df,type='candle',ax=ax4,axtitle='starsandstripes')
+  mpf.show()
